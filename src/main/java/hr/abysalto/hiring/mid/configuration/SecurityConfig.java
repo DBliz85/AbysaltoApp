@@ -6,10 +6,12 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
-import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -24,17 +26,28 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http.csrf(new Customizer<CsrfConfigurer<HttpSecurity>>() {
-				@Override
-				public void customize(CsrfConfigurer<HttpSecurity> httpSecurityCsrfConfigurer) {
-					httpSecurityCsrfConfigurer.disable();
-				}
-			}).authorizeHttpRequests(authorizeRequests ->
-											 authorizeRequests.requestMatchers("/swagger-ui/**").permitAll()
-															  .requestMatchers("/v3/api-docs*/**").permitAll()
-															  .anyRequest().authenticated())
-			.httpBasic(Customizer.withDefaults())
-			.formLogin(Customizer.withDefaults());
+		http
+				.csrf(csrf -> csrf
+						.ignoringRequestMatchers(
+								"/h2-console/**",   // H2 console
+								"/api/auth/**"      // registration/login endpoints
+						)
+				)
+				.headers(headers -> headers
+						.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin) // allow H2 console in iframe
+				)
+				.authorizeHttpRequests(auth -> auth
+						.requestMatchers(
+								"/h2-console/**",
+								"/swagger-ui/**",
+								"/v3/api-docs*/**",
+								"/api/auth/**",
+								"/api/products/**"
+						).permitAll()
+						.anyRequest().authenticated()
+				)
+				.httpBasic(Customizer.withDefaults()); // enable basic auth for secured endpoints
+
 		return http.build();
 	}
 
@@ -42,5 +55,10 @@ public class SecurityConfig {
 	public UserDetailsService userDetailsService() {
 		UserDetails userDetails = User.withDefaultPasswordEncoder().username("user").password("password").roles("USER").build();
 		return new InMemoryUserDetailsManager(userDetails);
+	}
+
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
 	}
 }
