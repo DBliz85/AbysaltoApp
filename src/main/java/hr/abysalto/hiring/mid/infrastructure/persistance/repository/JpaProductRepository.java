@@ -1,37 +1,53 @@
 package hr.abysalto.hiring.mid.infrastructure.persistance.repository;
 
-import hr.abysalto.hiring.mid.domain.model.Product;
-import hr.abysalto.hiring.mid.domain.repository.ProductRepository;
-import hr.abysalto.hiring.mid.infrastructure.persistance.mapper.ProductMapper;
+import hr.abysalto.hiring.mid.product.Product;
+import hr.abysalto.hiring.mid.product.ProductEntity;
+import hr.abysalto.hiring.mid.product.ProductRepository;
+import hr.abysalto.hiring.mid.common.mapper.ProductMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public class JpaProductRepository implements ProductRepository {
 
     private final SpringProductJpaRepository springRepo;
-    private final ProductMapper mapper;
 
     public JpaProductRepository(SpringProductJpaRepository springRepo, ProductMapper mapper) {
         this.springRepo = springRepo;
-        this.mapper = mapper;
     }
 
     @Override
     public Optional<Product> findById(Long id) {
-        return springRepo.findById(id).map(mapper::toDomain);
+        return springRepo.findById(id).map(ProductMapper::toDomain);
     }
 
     @Override
     public Page<Product> findAll(Pageable pageable) {
-        return springRepo.findAll(pageable).map(mapper::toDomain);
+        return springRepo.findAll(pageable).map(ProductMapper::toDomain);
     }
 
     @Override
     public Product save(Product product) {
-        return mapper.toDomain(springRepo.save(mapper.toEntity(product)));
+        ProductEntity entity = ProductMapper.toEntity(product);
+        ProductEntity saved = springRepo.save(entity);
+        return ProductMapper.toDomain(saved);
+    }
+
+    public List<ProductEntity> saveAll(List<Product> products) {
+        List<ProductEntity> entities = products.stream()
+                .map(dto -> {
+                    ProductEntity entity = new ProductEntity();
+                    entity.setId(null);
+                    entity.setName(dto.getName());
+                    entity.setPrice(dto.getPrice());
+                    return entity;
+                })
+                .toList();
+
+        return springRepo.saveAll(entities);
     }
 }

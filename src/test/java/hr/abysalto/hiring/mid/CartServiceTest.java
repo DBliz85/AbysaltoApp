@@ -1,134 +1,136 @@
 package hr.abysalto.hiring.mid;
 
-import hr.abysalto.hiring.mid.app.service.CartService;
-import hr.abysalto.hiring.mid.domain.model.Cart;
-import hr.abysalto.hiring.mid.domain.model.Product;
-import hr.abysalto.hiring.mid.domain.model.User;
-import hr.abysalto.hiring.mid.domain.repository.CartRepository;
-import hr.abysalto.hiring.mid.domain.repository.ProductRepository;
+import hr.abysalto.hiring.mid.cart.Cart;
+import hr.abysalto.hiring.mid.cart.CartRepository;
+import hr.abysalto.hiring.mid.cart.CartService;
+import hr.abysalto.hiring.mid.product.Product;
+import hr.abysalto.hiring.mid.product.ProductRepository;
+import hr.abysalto.hiring.mid.user.User;
+import hr.abysalto.hiring.mid.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class CartServiceTest {
 
     @Mock
-    private CartRepository cartRepository;
+    CartRepository cartRepository;
 
     @Mock
-    private ProductRepository productRepository;
+    ProductRepository productRepository;
+
+    @Mock
+    UserRepository userRepository;
+
+    @Mock
+    Authentication authentication;
 
     @InjectMocks
-    private CartService cartService;
+    CartService cartService;
 
-    private User user;
-    private Product laptop;
+    User user;
+    Product product;
 
     @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
+    void setup() {
+        user = new User(1L, "dejan", "secret");
 
-        user = new User(1L, "dejan", "password");
-        laptop = new Product(1L, "Laptop", BigDecimal.valueOf(1200));
+        product = new Product(10L, "Keyboard", BigDecimal.valueOf(111));
     }
 
     @Test
-    void addItem_existingCart_addsProduct() {
-        Cart existingCart = new Cart(user);
+    void testGetCart_WhenCartExists() {
+        Cart existingCart = new Cart(user.getId());
+        when(authentication.getName()).thenReturn("dejan");
+        when(userRepository.findByUsername("dejan")).thenReturn(Optional.of(user));
         when(cartRepository.findByUser(user)).thenReturn(Optional.of(existingCart));
-        when(productRepository.findById(anyLong())).thenReturn(Optional.of(laptop));
-        when(cartRepository.save(any(Cart.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Cart updatedCart = cartService.addItem(user, 1L, 2);
+        Cart cart = cartService.getCart(authentication);
 
-        assertEquals(1, updatedCart.getItems().size());
-        assertEquals(2, updatedCart.getItems().get(0).getQuantity());
-
-        verify(cartRepository).findByUser(user);
-        verify(productRepository).findById(1L);
-        verify(cartRepository).save(existingCart);
+        assertEquals(existingCart, cart);
+        verify(cartRepository, never()).save(any()); // should not save new cart
     }
 
     @Test
-    void addItem_noExistingCart_createsNewCart() {
+    void testGetCart_WhenCartDoesNotExist() {
+        when(authentication.getName()).thenReturn("dejan");
+        when(userRepository.findByUsername("dejan")).thenReturn(Optional.of(user));
         when(cartRepository.findByUser(user)).thenReturn(Optional.empty());
-        when(productRepository.findById(anyLong())).thenReturn(Optional.of(laptop));
         when(cartRepository.save(any(Cart.class))).thenAnswer(i -> i.getArgument(0));
 
-        Cart cart = cartService.addItem(user, 1L, 1);
+        Cart cart = cartService.getCart(authentication);
 
         assertNotNull(cart);
-        assertEquals(user, cart.getUser());
-        assertEquals(1, cart.getItems().size());
+        assertEquals(user.getId(), cart.getUserId());
+        verify(cartRepository, times(1)).save(any(Cart.class));
     }
 
     @Test
-    void removeItem_existingProduct_removesFromCart() {
-        Cart cart = new Cart(user);
-        cart.addItem(laptop, 2);
+    void testAddItem_Success() {
+        when(authentication.getName()).thenReturn("dejan");
+        when(userRepository.findByUsername("dejan")).thenReturn(Optional.of(user));
+        when(cartRepository.findByUser(user)).thenReturn(Optional.empty());
+        when(cartRepository.save(any(Cart.class))).thenAnswer(i -> i.getArgument(0));
+        when(productRepository.findById(10L)).thenReturn(Optional.of(product));
 
+        Cart cart = cartService.addItem(authentication, 10L, 2);
+
+        assertNotNull(cart);
+        assertEquals(user.getId(), cart.getUserId());
+        assertFalse(cart.isEmpty());
+        verify(cartRepository, times(2)).save(any(Cart.class)); // one for new cart, one after adding item
+    }
+
+    @Test
+    void testRemoveItem_Success() {
+        Cart cart = new Cart(user.getId());
+        cart.addItem(product, 2);
+
+        when(authentication.getName()).thenReturn("dejan");
+        when(userRepository.findByUsername("dejan")).thenReturn(Optional.of(user));
         when(cartRepository.findByUser(user)).thenReturn(Optional.of(cart));
         when(cartRepository.save(any(Cart.class))).thenAnswer(i -> i.getArgument(0));
 
-        Cart updatedCart = cartService.removeItem(user, 1L);
-
-        assertTrue(updatedCart.getItems().isEmpty());
-        verify(cartRepository).findByUser(user);
-        verify(cartRepository).save(cart);
-    }
-
-    @Test
-    void getCart_existingCart_returnsCart() {
-        Cart cart = new Cart(user);
-        when(cartRepository.findByUser(user)).thenReturn(Optional.of(cart));
-
-        Cart result = cartService.getCart(user);
-
-        assertEquals(cart, result);
-    }
-
-    @Test
-    void getCart_noCart_returnsNewCart() {
-        when(cartRepository.findByUser(user)).thenReturn(Optional.empty());
-
-        Cart result = cartService.getCart(user);
+        Cart result = cartService.removeItem(authentication, 10L);
 
         assertNotNull(result);
-        assertEquals(user, result.getUser());
-        assertTrue(result.getItems().isEmpty());
+        assertTrue(result.isEmpty());
+        verify(cartRepository, times(1)).save(cart);
     }
 
     @Test
-    void addItem_nonExistingProduct_throwsException() {
+    void testGetUser_NotFound() {
+        when(authentication.getName()).thenReturn("unknown");
+        when(userRepository.findByUsername("unknown")).thenReturn(Optional.empty());
+
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> cartService.getCart(authentication));
+
+        assertEquals("User not found", exception.getMessage());
+    }
+
+    @Test
+    void testGetProduct_NotFound() {
+        when(authentication.getName()).thenReturn("dejan");
+        when(userRepository.findByUsername("dejan")).thenReturn(Optional.of(user));
         when(cartRepository.findByUser(user)).thenReturn(Optional.empty());
         when(productRepository.findById(999L)).thenReturn(Optional.empty());
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
-            cartService.addItem(user, 999L, 1);
-        });
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> cartService.addItem(authentication, 999L, 1));
 
-        assertEquals("Product not found", ex.getMessage());
-    }
-
-    @Test
-    void removeItem_noCart_throwsException() {
-        when(cartRepository.findByUser(user)).thenReturn(Optional.empty());
-
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
-            cartService.removeItem(user, 1L);
-        });
-
-        assertEquals("Cart not found", ex.getMessage());
+        assertEquals("Product not found", exception.getMessage());
     }
 }

@@ -1,8 +1,8 @@
 package hr.abysalto.hiring.mid;
 
-import hr.abysalto.hiring.mid.domain.model.User;
-import hr.abysalto.hiring.mid.infrastructure.persistance.entity.UserEntity;
-import hr.abysalto.hiring.mid.infrastructure.persistance.mapper.UserMapper;
+import hr.abysalto.hiring.mid.user.User;
+import hr.abysalto.hiring.mid.user.UserEntity;
+import hr.abysalto.hiring.mid.common.mapper.UserMapper;
 import hr.abysalto.hiring.mid.infrastructure.persistance.repository.JpaUserRepository;
 import hr.abysalto.hiring.mid.infrastructure.persistance.repository.SpringUserJpaRepository;
 import jakarta.transaction.Transactional;
@@ -23,14 +23,11 @@ class JpaUserRepositoryTest {
     @Autowired
     private SpringUserJpaRepository springUserJpaRepository;
 
-    @Autowired
-    private UserMapper userMapper;
-
     private JpaUserRepository jpaUserRepository;
 
     @BeforeEach
     void setup() {
-        jpaUserRepository = new JpaUserRepository(springUserJpaRepository, userMapper);
+        jpaUserRepository = new JpaUserRepository(springUserJpaRepository);
     }
 
     @Test

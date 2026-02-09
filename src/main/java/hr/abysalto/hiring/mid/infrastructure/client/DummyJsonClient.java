@@ -1,6 +1,6 @@
 package hr.abysalto.hiring.mid.infrastructure.client;
 
-import hr.abysalto.hiring.mid.domain.model.Product;
+import hr.abysalto.hiring.mid.product.Product;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;

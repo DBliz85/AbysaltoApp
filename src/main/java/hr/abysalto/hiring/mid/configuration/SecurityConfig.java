@@ -29,24 +29,23 @@ public class SecurityConfig {
 		http
 				.csrf(csrf -> csrf
 						.ignoringRequestMatchers(
-								"/h2-console/**",   // H2 console
-								"/api/auth/**"      // registration/login endpoints
+								"/h2-console/**",
+								"/api/**"
 						)
 				)
 				.headers(headers -> headers
-						.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin) // allow H2 console in iframe
+						.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
 				)
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers(
 								"/h2-console/**",
 								"/swagger-ui/**",
 								"/v3/api-docs*/**",
-								"/api/auth/**",
-								"/api/products/**"
+								"/api/**"
 						).permitAll()
 						.anyRequest().authenticated()
 				)
-				.httpBasic(Customizer.withDefaults()); // enable basic auth for secured endpoints
+				.httpBasic(Customizer.withDefaults());
 
 		return http.build();
 	}

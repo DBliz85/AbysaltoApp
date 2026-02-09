@@ -1,10 +1,11 @@
 package hr.abysalto.hiring.mid;
 
-import hr.abysalto.hiring.mid.app.service.UserService;
-import hr.abysalto.hiring.mid.domain.model.User;
-import hr.abysalto.hiring.mid.domain.repository.UserRepository;
+import hr.abysalto.hiring.mid.user.User;
+import hr.abysalto.hiring.mid.user.UserRepository;
+import hr.abysalto.hiring.mid.user.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -28,39 +29,60 @@ public class UserServiceTest {
     private UserService userService;
 
     @Test
-    void findByUsername_existingUser_returnsUser() {
-        User user = new User(1L, "dejan", "password");
-
+    void testFindByUsername_UserExists() {
+        User user = new User(1L, "dejan", "passwordHash");
         when(userRepository.findByUsername("dejan")).thenReturn(Optional.of(user));
 
-        Optional<User> existingUser = Optional.ofNullable(userService.findByUsername("dejan"));
+        User existingUser = userService.findByUsername("dejan");
 
-        assertTrue(existingUser.isPresent());
-        assertEquals("dejan", existingUser.get().getUsername());
-        assertEquals("password", existingUser.get().getPassword());
+        assertNotNull(existingUser);
+        assertEquals("dejan", existingUser.getUsername());
+        verify(userRepository, times(1)).findByUsername("dejan");
     }
 
+
     @Test
-    void findByUsername_nonExistingUser_returnsEmpty() {
+    void testFindByUsername_UserDoesNotExist() {
         when(userRepository.findByUsername("unknown")).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> userService.findByUsername("unknown"));
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> userService.findByUsername("unknown"));
+
+        assertEquals("User not found", exception.getMessage());
+        verify(userRepository, times(1)).findByUsername("unknown");
     }
+
     @Test
-    void saveUser_callsRepository() {
-        User user = new User(null, "alice", "secret");
+    void testCreateUser_Success() {
 
-        // Mock the encoding
-        when(passwordEncoder.encode("secret")).thenReturn("encoded-secret");
+        User savedUser = new User(2L, "alice", "passwordHash");
 
-        when(userRepository.save(any(User.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        when(passwordEncoder.encode(anyString())).thenAnswer(i -> "hashed-" + i.getArgument(0));
 
-        User registeredUser = userService.register(user.getUsername(), user.getPassword());
+        User result = userService.register("alice", "passwordHash");
 
-        assertEquals("encoded-secret", registeredUser.getPassword());
+        assertNotNull(result);
+        assertEquals(2L, result.getId());
+        assertEquals("alice", result.getUsername());
 
-        verify(userRepository, times(1)).save(any(User.class));
-        verify(passwordEncoder, times(1)).encode("secret");
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository, times(1)).save(userCaptor.capture());
+
+        User captured = userCaptor.getValue();
+        assertEquals("alice", captured.getUsername());
+        assertEquals("hashed-passwordHash", captured.getPassword());
+    }
+
+    @Test
+    void testCreateUser_NullUsername_Throws() {
+        assertThrows(IllegalArgumentException.class,
+                () -> userService.register(null, "pass"));
+    }
+
+    @Test
+    void testCreateUser_BlankUsername_Throws() {
+        assertThrows(IllegalArgumentException.class,
+                () -> userService.register(" ", "pass"));
     }
 }
