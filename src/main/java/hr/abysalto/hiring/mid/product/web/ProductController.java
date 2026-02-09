@@ -1,9 +1,7 @@
 package hr.abysalto.hiring.mid.product.web;
 
-import hr.abysalto.hiring.mid.common.mapper.ProductMapper;
 import hr.abysalto.hiring.mid.product.app.usecase.ProductService;
-import hr.abysalto.hiring.mid.product.domain.Product;
-import hr.abysalto.hiring.mid.product.domain.ProductResponse;
+import hr.abysalto.hiring.mid.product.dto.ProductDto;
 import hr.abysalto.hiring.mid.product.dto.ProductRequest;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
@@ -23,19 +21,17 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<Product> getProducts(Pageable pageable) {
+    public List<ProductDto> getProducts(Pageable pageable) {
         return productService.getProducts(pageable).getContent();
     }
-
     @GetMapping("/{id}")
-    public Product getProduct(@PathVariable Long id) {
+    public ProductDto getProduct(@PathVariable Long id) {
         return productService.getProduct(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ProductResponse createProduct(@Valid @RequestBody ProductRequest request) {
-        Product product = productService.createProduct(request.name(), request.price());
-        return ProductMapper.toResponse(product);
+    public ProductDto createProduct(@Valid @RequestBody ProductRequest request) {
+        return productService.createProduct(request.name(), request.price());
     }
 }

@@ -1,7 +1,7 @@
 package hr.abysalto.hiring.mid.cart.web;
 
 import hr.abysalto.hiring.mid.cart.dto.AddToCartRequest;
-import hr.abysalto.hiring.mid.cart.dto.CartResponse;
+import hr.abysalto.hiring.mid.cart.dto.CartDto;
 import hr.abysalto.hiring.mid.cart.app.usecase.CartService;
 import hr.abysalto.hiring.mid.common.mapper.CartMapper;
 import jakarta.validation.Valid;
@@ -22,13 +22,13 @@ public class CartController {
     }
 
     @GetMapping
-    public CartResponse getCart(Authentication authentication) {
+    public CartDto getCart(Authentication authentication) {
         return cartMapper.toResponse(cartService.getCart(authentication));
     }
 
     @PostMapping("/items")
     @ResponseStatus(HttpStatus.CREATED)
-    public CartResponse addItem(
+    public CartDto addItem(
             Authentication authentication,
             @Valid @RequestBody AddToCartRequest request) {
         return cartMapper.toResponse(
@@ -37,7 +37,7 @@ public class CartController {
     }
 
     @DeleteMapping("/items/{productId}")
-    public CartResponse removeItem(
+    public CartDto removeItem(
             Authentication authentication,
             @PathVariable Long productId) {
         return cartMapper.toResponse(

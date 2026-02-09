@@ -3,6 +3,7 @@ package hr.abysalto.hiring.mid.user.infrastructure.persistance;
 import hr.abysalto.hiring.mid.user.domain.User;
 import hr.abysalto.hiring.mid.common.mapper.UserMapper;
 import hr.abysalto.hiring.mid.user.domain.UserRepository;
+import hr.abysalto.hiring.mid.user.infrastructure.persistance.entity.UserEntity;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;

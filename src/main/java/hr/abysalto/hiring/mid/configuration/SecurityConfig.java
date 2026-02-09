@@ -27,16 +27,16 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http.csrf(new Customizer<CsrfConfigurer<HttpSecurity>>() {
-					@Override
-					public void customize(CsrfConfigurer<HttpSecurity> httpSecurityCsrfConfigurer) {
-						httpSecurityCsrfConfigurer.disable();
-					}
-				}).authorizeHttpRequests(authorizeRequests ->
-						authorizeRequests.requestMatchers("/swagger-ui/**").permitAll()
-								.requestMatchers("/v3/api-docs*/**").permitAll()
-								.anyRequest().authenticated())
-				.httpBasic(Customizer.withDefaults())
-				.formLogin(Customizer.withDefaults());
+				@Override
+				public void customize(CsrfConfigurer<HttpSecurity> httpSecurityCsrfConfigurer) {
+					httpSecurityCsrfConfigurer.disable();
+				}
+			}).authorizeHttpRequests(authorizeRequests ->
+											 authorizeRequests.requestMatchers("/swagger-ui/**").permitAll()
+															  .requestMatchers("/v3/api-docs*/**").permitAll()
+															  .anyRequest().authenticated())
+			.httpBasic(Customizer.withDefaults())
+			.formLogin(Customizer.withDefaults());
 		return http.build();
 	}
 

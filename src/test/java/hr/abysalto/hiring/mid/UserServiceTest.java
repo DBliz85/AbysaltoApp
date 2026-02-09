@@ -3,6 +3,7 @@ package hr.abysalto.hiring.mid;
 import hr.abysalto.hiring.mid.user.domain.User;
 import hr.abysalto.hiring.mid.user.domain.UserRepository;
 import hr.abysalto.hiring.mid.user.app.usecase.UserService;
+import hr.abysalto.hiring.mid.user.dto.UserDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -33,10 +34,10 @@ public class UserServiceTest {
         User user = new User(1L, "dejan", "passwordHash");
         when(userRepository.findByUsername("dejan")).thenReturn(Optional.of(user));
 
-        User existingUser = userService.findByUsername("dejan");
+        UserDto existingUser = userService.findByUsername("dejan");
 
         assertNotNull(existingUser);
-        assertEquals("dejan", existingUser.getUsername());
+        assertEquals("dejan", existingUser.username());
         verify(userRepository, times(1)).findByUsername("dejan");
     }
 
@@ -60,11 +61,7 @@ public class UserServiceTest {
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
         when(passwordEncoder.encode(anyString())).thenAnswer(i -> "hashed-" + i.getArgument(0));
 
-        User result = userService.register("alice", "passwordHash");
-
-        assertNotNull(result);
-        assertEquals(2L, result.getId());
-        assertEquals("alice", result.getUsername());
+        userService.register("alice", "passwordHash");
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository, times(1)).save(userCaptor.capture());

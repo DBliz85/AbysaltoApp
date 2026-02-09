@@ -1,7 +1,9 @@
 package hr.abysalto.hiring.mid.product.app.usecase;
 
+import hr.abysalto.hiring.mid.common.mapper.ProductMapper;
 import hr.abysalto.hiring.mid.infrastructure.client.DummyJsonClient;
 import hr.abysalto.hiring.mid.product.domain.Product;
+import hr.abysalto.hiring.mid.product.dto.ProductDto;
 import hr.abysalto.hiring.mid.product.infrastructure.persistance.ProductRepository;
 import hr.abysalto.hiring.mid.user.domain.User;
 import hr.abysalto.hiring.mid.user.domain.UserRepository;
@@ -26,24 +28,29 @@ public class ProductService {
     }
 
     @Transactional
-    public Page<Product> getProducts(Pageable pageable) {
+    public Page<ProductDto> getProducts(Pageable pageable) {
         Page<Product> products = productRepository.findAll(pageable);
+
         if (products.isEmpty()) {
-            List<Product> fetchedProducts = dummyJsonClient.fetchProducts();
+            List<Product> fetchedProducts = dummyJsonClient.fetchProducts(); // entities
             productRepository.saveAll(fetchedProducts);
-            products = productRepository.findAll(pageable);
+            products = productRepository.findAll(pageable); // fetch saved entities again
         }
-        return products;
+
+        return products.map(ProductMapper::toDto);
     }
 
-    public Product getProduct(Long id) {
-        return productRepository.findById(id)
+    public ProductDto getProduct(Long id) {
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
+        return ProductMapper.toDto(product);
     }
 
-    public Product createProduct(String name, BigDecimal price) {
+    public ProductDto createProduct(String name, BigDecimal price) {
         Product product = new Product(null, name, price);
-        return productRepository.save(product);
+        return ProductMapper.toDto(
+                productRepository.save(product)
+        );
     }
 
     @Transactional

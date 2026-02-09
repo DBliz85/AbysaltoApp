@@ -1,8 +1,8 @@
 package hr.abysalto.hiring.mid.common.mapper;
 
 import hr.abysalto.hiring.mid.product.domain.Product;
+import hr.abysalto.hiring.mid.product.dto.ProductDto;
 import hr.abysalto.hiring.mid.product.infrastructure.persistance.entity.ProductEntity;
-import hr.abysalto.hiring.mid.product.domain.ProductResponse;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -10,11 +10,12 @@ public class ProductMapper {
 
     private ProductMapper() {}
 
-    public static ProductResponse toResponse(Product product) {
-        if (product == null) {
-            throw new IllegalArgumentException("Product must not be null");
-        }
-        return new ProductResponse(product.getId(), product.getName(), product.getPrice());
+    public static ProductDto toDto(Product product) {
+        return new ProductDto(
+                product.getId(),
+                product.getName(),
+                product.getPrice()
+        );
     }
 
     public static ProductEntity toEntity(Product product) {
