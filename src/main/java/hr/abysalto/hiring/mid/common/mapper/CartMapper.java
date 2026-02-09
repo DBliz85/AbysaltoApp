@@ -1,9 +1,9 @@
 package hr.abysalto.hiring.mid.common.mapper;
 
-import hr.abysalto.hiring.mid.cart.Cart;
-import hr.abysalto.hiring.mid.cart.CartItem;
-import hr.abysalto.hiring.mid.cart.CartItemResponse;
-import hr.abysalto.hiring.mid.cart.CartResponse;
+import hr.abysalto.hiring.mid.cart.domain.Cart;
+import hr.abysalto.hiring.mid.cart.domain.CartItem;
+import hr.abysalto.hiring.mid.cart.dto.CartItemResponse;
+import hr.abysalto.hiring.mid.cart.dto.CartResponse;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

@@ -6,7 +6,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -26,27 +26,17 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http
-				.csrf(csrf -> csrf
-						.ignoringRequestMatchers(
-								"/h2-console/**",
-								"/api/**"
-						)
-				)
-				.headers(headers -> headers
-						.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
-				)
-				.authorizeHttpRequests(auth -> auth
-						.requestMatchers(
-								"/h2-console/**",
-								"/swagger-ui/**",
-								"/v3/api-docs*/**",
-								"/api/**"
-						).permitAll()
-						.anyRequest().authenticated()
-				)
-				.httpBasic(Customizer.withDefaults());
-
+		http.csrf(new Customizer<CsrfConfigurer<HttpSecurity>>() {
+					@Override
+					public void customize(CsrfConfigurer<HttpSecurity> httpSecurityCsrfConfigurer) {
+						httpSecurityCsrfConfigurer.disable();
+					}
+				}).authorizeHttpRequests(authorizeRequests ->
+						authorizeRequests.requestMatchers("/swagger-ui/**").permitAll()
+								.requestMatchers("/v3/api-docs*/**").permitAll()
+								.anyRequest().authenticated())
+				.httpBasic(Customizer.withDefaults())
+				.formLogin(Customizer.withDefaults());
 		return http.build();
 	}
 

@@ -1,7 +1,7 @@
 package hr.abysalto.hiring.mid.common.mapper;
 
-import hr.abysalto.hiring.mid.user.User;
-import hr.abysalto.hiring.mid.user.UserEntity;
+import hr.abysalto.hiring.mid.user.domain.User;
+import hr.abysalto.hiring.mid.user.domain.UserEntity;
 import org.springframework.stereotype.Component;
 
 @Component

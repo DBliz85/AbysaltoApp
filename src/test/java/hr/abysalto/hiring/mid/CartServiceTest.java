@@ -1,12 +1,12 @@
 package hr.abysalto.hiring.mid;
 
-import hr.abysalto.hiring.mid.cart.Cart;
-import hr.abysalto.hiring.mid.cart.CartRepository;
-import hr.abysalto.hiring.mid.cart.CartService;
-import hr.abysalto.hiring.mid.product.Product;
-import hr.abysalto.hiring.mid.product.ProductRepository;
-import hr.abysalto.hiring.mid.user.User;
-import hr.abysalto.hiring.mid.user.UserRepository;
+import hr.abysalto.hiring.mid.cart.domain.Cart;
+import hr.abysalto.hiring.mid.cart.persistance.repository.CartRepository;
+import hr.abysalto.hiring.mid.cart.app.CartService;
+import hr.abysalto.hiring.mid.product.domain.Product;
+import hr.abysalto.hiring.mid.product.persistance.repository.ProductRepository;
+import hr.abysalto.hiring.mid.user.domain.User;
+import hr.abysalto.hiring.mid.user.persistance.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

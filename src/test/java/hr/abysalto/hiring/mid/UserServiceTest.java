@@ -1,8 +1,8 @@
 package hr.abysalto.hiring.mid;
 
-import hr.abysalto.hiring.mid.user.User;
-import hr.abysalto.hiring.mid.user.UserRepository;
-import hr.abysalto.hiring.mid.user.UserService;
+import hr.abysalto.hiring.mid.user.domain.User;
+import hr.abysalto.hiring.mid.user.persistance.repository.UserRepository;
+import hr.abysalto.hiring.mid.user.app.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

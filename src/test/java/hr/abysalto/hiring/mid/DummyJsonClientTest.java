@@ -1,7 +1,7 @@
 package hr.abysalto.hiring.mid;
 
 import hr.abysalto.hiring.mid.infrastructure.client.DummyJsonClient;
-import hr.abysalto.hiring.mid.product.Product;
+import hr.abysalto.hiring.mid.product.domain.Product;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

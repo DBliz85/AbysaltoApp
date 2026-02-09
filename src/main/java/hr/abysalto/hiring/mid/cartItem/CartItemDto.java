@@ -1,6 +1,6 @@
 package hr.abysalto.hiring.mid.cartItem;
 
-import hr.abysalto.hiring.mid.product.ProductDto;
+import hr.abysalto.hiring.mid.product.dto.ProductDto;
 
 import java.math.BigDecimal;
 

@@ -1,10 +1,10 @@
 package hr.abysalto.hiring.mid.favorites;
 
 import hr.abysalto.hiring.mid.common.mapper.ProductMapper;
-import hr.abysalto.hiring.mid.infrastructure.persistance.repository.SpringProductJpaRepository;
-import hr.abysalto.hiring.mid.infrastructure.persistance.repository.SpringUserJpaRepository;
-import hr.abysalto.hiring.mid.product.Product;
-import hr.abysalto.hiring.mid.user.UserEntity;
+import hr.abysalto.hiring.mid.product.persistance.repository.SpringProductJpaRepository;
+import hr.abysalto.hiring.mid.user.persistance.repository.SpringUserJpaRepository;
+import hr.abysalto.hiring.mid.product.domain.Product;
+import hr.abysalto.hiring.mid.user.domain.UserEntity;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 

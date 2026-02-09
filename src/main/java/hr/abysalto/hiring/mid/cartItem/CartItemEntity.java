@@ -1,6 +1,6 @@
 package hr.abysalto.hiring.mid.cartItem;
 
-import hr.abysalto.hiring.mid.product.ProductEntity;
+import hr.abysalto.hiring.mid.product.domain.ProductEntity;
 import jakarta.persistence.*;
 
 @Entity

@@ -1,7 +1,7 @@
 package hr.abysalto.hiring.mid.favorites;
 
 import hr.abysalto.hiring.mid.common.mapper.ProductMapper;
-import hr.abysalto.hiring.mid.product.ProductResponse;
+import hr.abysalto.hiring.mid.product.domain.ProductResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
