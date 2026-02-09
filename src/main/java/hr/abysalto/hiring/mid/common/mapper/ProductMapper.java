@@ -1,7 +1,7 @@
 package hr.abysalto.hiring.mid.common.mapper;
 
 import hr.abysalto.hiring.mid.product.domain.Product;
-import hr.abysalto.hiring.mid.product.domain.ProductEntity;
+import hr.abysalto.hiring.mid.product.infrastructure.persistance.entity.ProductEntity;
 import hr.abysalto.hiring.mid.product.domain.ProductResponse;
 import org.springframework.stereotype.Component;
 

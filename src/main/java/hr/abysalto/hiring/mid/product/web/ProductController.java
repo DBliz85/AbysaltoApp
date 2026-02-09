@@ -1,7 +1,7 @@
 package hr.abysalto.hiring.mid.product.web;
 
 import hr.abysalto.hiring.mid.common.mapper.ProductMapper;
-import hr.abysalto.hiring.mid.product.app.ProductService;
+import hr.abysalto.hiring.mid.product.app.usecase.ProductService;
 import hr.abysalto.hiring.mid.product.domain.Product;
 import hr.abysalto.hiring.mid.product.domain.ProductResponse;
 import hr.abysalto.hiring.mid.product.dto.ProductRequest;

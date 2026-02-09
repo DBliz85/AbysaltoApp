@@ -1,6 +1,6 @@
 package hr.abysalto.hiring.mid.user.web;
 
-import hr.abysalto.hiring.mid.user.app.UserService;
+import hr.abysalto.hiring.mid.user.app.usecase.UserService;
 import hr.abysalto.hiring.mid.user.domain.User;
 import hr.abysalto.hiring.mid.user.dto.RegisterRequest;
 import jakarta.validation.Valid;

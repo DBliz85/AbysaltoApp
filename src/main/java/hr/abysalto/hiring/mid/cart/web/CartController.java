@@ -2,7 +2,7 @@ package hr.abysalto.hiring.mid.cart.web;
 
 import hr.abysalto.hiring.mid.cart.dto.AddToCartRequest;
 import hr.abysalto.hiring.mid.cart.dto.CartResponse;
-import hr.abysalto.hiring.mid.cart.app.CartService;
+import hr.abysalto.hiring.mid.cart.app.usecase.CartService;
 import hr.abysalto.hiring.mid.common.mapper.CartMapper;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

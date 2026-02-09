@@ -1,8 +1,8 @@
 package hr.abysalto.hiring.mid.common.mapper;
 
 import hr.abysalto.hiring.mid.cart.domain.Cart;
-import hr.abysalto.hiring.mid.cart.domain.JpaCartEntity;
-import hr.abysalto.hiring.mid.cart.domain.JpaCartItemEntity;
+import hr.abysalto.hiring.mid.cart.infrastructure.persistance.entity.JpaCartEntity;
+import hr.abysalto.hiring.mid.cart.infrastructure.persistance.entity.JpaCartItemEntity;
 import hr.abysalto.hiring.mid.product.domain.Product;
 import org.springframework.stereotype.Component;
 
