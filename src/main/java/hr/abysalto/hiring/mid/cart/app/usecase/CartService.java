@@ -1,25 +1,27 @@
 package hr.abysalto.hiring.mid.cart.app.usecase;
 
 import hr.abysalto.hiring.mid.cart.domain.Cart;
-import hr.abysalto.hiring.mid.cart.infrastructure.persistance.CartRepository;
-import hr.abysalto.hiring.mid.product.app.usecase.port.in.ProductUseCase;
-import hr.abysalto.hiring.mid.product.dto.ProductDto;
+import hr.abysalto.hiring.mid.cart.domain.CartRepository;
+import hr.abysalto.hiring.mid.product.domain.Product;
+import hr.abysalto.hiring.mid.product.domain.ProductRepository;
 import hr.abysalto.hiring.mid.user.domain.User;
 import hr.abysalto.hiring.mid.user.domain.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @Transactional
 public class CartService {
 
     private final CartRepository cartRepository;
-    private final ProductUseCase productRepository;
+    private final ProductRepository productRepository;
     private final UserRepository userRepository;
 
     public CartService(CartRepository cartRepository,
-                       ProductUseCase productRepository,
+                       ProductRepository productRepository,
                        UserRepository userRepository) {
         this.cartRepository = cartRepository;
         this.productRepository = productRepository;
@@ -37,12 +39,12 @@ public class CartService {
         User user = userRepository.findByUsername(authentication.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        ProductDto product = productRepository.getProductById(productId);
+        Optional<Product> product = productRepository.findById(productId);
 
         Cart cart = cartRepository.findByUserId(user.getId())
                 .orElseGet(() -> cartRepository.save(new Cart(user.getId())));
 
-        cart.addItem(product, quantity);
+        cart.addItem(product.orElse(null), quantity);
 
         return cartRepository.save(cart);
     }

@@ -1,4 +1,4 @@
-package hr.abysalto.hiring.mid.cart.infrastructure.persistance.entity;
+package hr.abysalto.hiring.mid.cart.infrastructure.entity;
 
 import jakarta.persistence.*;
 

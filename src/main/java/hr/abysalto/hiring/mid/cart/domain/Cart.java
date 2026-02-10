@@ -1,6 +1,6 @@
 package hr.abysalto.hiring.mid.cart.domain;
 
-import hr.abysalto.hiring.mid.product.dto.ProductDto;
+import hr.abysalto.hiring.mid.product.domain.Product;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,13 +21,13 @@ public class Cart {
         this.userId = userId;
     }
 
-    public void addItem(ProductDto productDto, int quantity) {
+    public void addItem(Product product, int quantity) {
         if (this.id == null) {
             throw new IllegalStateException("Cart ID must not be null before adding items");
         }
 
         CartItem existing = items.stream()
-                .filter(i -> i.getProductId().equals(productDto.id()))
+                .filter(i -> i.getProductId().equals(product.getId()))
                 .findFirst()
                 .orElse(null);
 
@@ -36,9 +36,9 @@ public class Cart {
             items.add(existing.increaseQuantity(quantity));
         } else {
             items.add(CartItem.fromProduct(
-                    productDto.id(),
-                    productDto.title(),
-                    productDto.price(),
+                    product.getId(),
+                    product.getTitle(),
+                    product.getPrice(),
                     quantity
             ));
         }

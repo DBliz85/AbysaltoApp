@@ -3,13 +3,14 @@ package hr.abysalto.hiring.mid.user.app.usecase;
 import hr.abysalto.hiring.mid.common.mapper.UserMapper;
 import hr.abysalto.hiring.mid.user.domain.User;
 import hr.abysalto.hiring.mid.user.domain.UserRepository;
+import hr.abysalto.hiring.mid.user.dto.LoginResponse;
+import hr.abysalto.hiring.mid.user.dto.RegisterRequest;
 import hr.abysalto.hiring.mid.user.dto.UserDto;
-import hr.abysalto.hiring.mid.user.infrastructure.persistance.entity.UserEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserService {
+public class UserService implements UserUseCase {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -29,5 +30,17 @@ public class UserService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         return UserMapper.toDto(user);
+    }
+
+    @Override
+    public LoginResponse login(RegisterRequest request) {
+        User user = userRepository.findByUsername(request.username())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+            throw new RuntimeException("Invalid credentials");
+        }
+
+        return new LoginResponse(user.getUsername(), "Login successful");
     }
 }

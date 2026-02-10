@@ -2,8 +2,8 @@ package hr.abysalto.hiring.mid;
 
 import hr.abysalto.hiring.mid.user.domain.User;
 import hr.abysalto.hiring.mid.user.infrastructure.persistance.entity.UserEntity;
-import hr.abysalto.hiring.mid.user.infrastructure.persistance.JpaUserRepository;
-import hr.abysalto.hiring.mid.user.infrastructure.persistance.SpringUserJpaRepository;
+import hr.abysalto.hiring.mid.user.infrastructure.persistance.entity.JpaUserRepository;
+import hr.abysalto.hiring.mid.user.infrastructure.persistance.entity.SpringUserJpaRepository;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

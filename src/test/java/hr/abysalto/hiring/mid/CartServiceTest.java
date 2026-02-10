@@ -3,11 +3,9 @@ package hr.abysalto.hiring.mid;
 import hr.abysalto.hiring.mid.cart.app.usecase.CartService;
 import hr.abysalto.hiring.mid.cart.domain.Cart;
 import hr.abysalto.hiring.mid.cart.domain.CartItem;
-import hr.abysalto.hiring.mid.cart.infrastructure.persistance.CartRepository;
-import hr.abysalto.hiring.mid.common.mapper.ProductMapper;
-import hr.abysalto.hiring.mid.product.app.usecase.port.in.ProductUseCase;
+import hr.abysalto.hiring.mid.cart.domain.CartRepository;
 import hr.abysalto.hiring.mid.product.domain.Product;
-import hr.abysalto.hiring.mid.product.dto.ProductDto;
+import hr.abysalto.hiring.mid.product.domain.ProductRepository;
 import hr.abysalto.hiring.mid.user.domain.User;
 import hr.abysalto.hiring.mid.user.domain.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +31,7 @@ public class CartServiceTest {
     CartRepository cartRepository;
 
     @Mock
-    ProductUseCase productRepository;
+    ProductRepository productRepository;
 
     @Mock
     UserRepository userRepository;
@@ -88,9 +86,8 @@ public class CartServiceTest {
         when(userRepository.findByUsername("dejan")).thenReturn(Optional.of(user));
         when(cartRepository.findByUserId(user.getId())).thenReturn(Optional.of(cart));
         when(cartRepository.save(any(Cart.class))).thenAnswer(i -> i.getArgument(0));
-        ProductDto productDto = new ProductDto(10L,"Test Product", BigDecimal.valueOf(100));
 
-        when(productRepository.getProductById(10L)).thenReturn(productDto);
+        when(productRepository.findById(10L)).thenReturn(Optional.of(product));
 
         cart = cartService.addItem(authentication, 10L, 2);
 
@@ -106,7 +103,7 @@ public class CartServiceTest {
     @Test
     void testRemoveItem_Success() {
         Cart cart = new Cart(1L, user.getId(), new ArrayList<>());
-        cart.addItem(ProductMapper.toDto(product), 2);
+        cart.addItem(product, 2);
 
         when(authentication.getName()).thenReturn("dejan");
         when(userRepository.findByUsername("dejan")).thenReturn(Optional.of(user));

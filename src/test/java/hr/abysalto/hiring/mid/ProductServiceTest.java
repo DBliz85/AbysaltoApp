@@ -1,115 +1,105 @@
 package hr.abysalto.hiring.mid;
 
-import hr.abysalto.hiring.mid.product.app.usecase.port.out.ProductPersistencePort;
+import hr.abysalto.hiring.mid.product.app.usecase.ProductService;
+import hr.abysalto.hiring.mid.product.app.usecase.exception.dto.ProductNotFoundException;
 import hr.abysalto.hiring.mid.product.domain.Product;
-import hr.abysalto.hiring.mid.product.app.usecase.service.ProductService;
+import hr.abysalto.hiring.mid.product.domain.ProductRepository;
 import hr.abysalto.hiring.mid.product.dto.ProductDto;
-import hr.abysalto.hiring.mid.product.infrastructure.persistance.client.DummyJsonClientImpl;
+import hr.abysalto.hiring.mid.product.infrastructure.persistance.client.DummyJsonClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.ArgumentCaptor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 public class ProductServiceTest {
 
-    @Mock
-    private DummyJsonClientImpl dummyJsonClient;
-
-    @InjectMocks
+    private ProductRepository productRepository;
+    private DummyJsonClient dummyJsonClient;
     private ProductService productService;
-
-    private List<Product> products;
 
     @BeforeEach
     void setUp() {
-        products = List.of(
-                new Product(1L, "Product 1", BigDecimal.valueOf(10)),
-                new Product(2L, "Product 2", BigDecimal.valueOf(20)),
-                new Product(3L, "Product 3", BigDecimal.valueOf(30))
-        );
+        productRepository = mock(ProductRepository.class);
+        dummyJsonClient = mock(DummyJsonClient.class);
+        productService = new ProductService(productRepository, dummyJsonClient);
     }
+
     @Test
-    void getAllProducts_shouldReturnFirstPage() {
-        Pageable pageable = PageRequest.of(0, 2);
+    void testGetProducts_FromRepository() {
+        Product p1 = new Product(1L, "Phone", BigDecimal.valueOf(500));
+        Product p2 = new Product(2L, "Laptop", BigDecimal.valueOf(1000));
+        Page<Product> page = new PageImpl<>(List.of(p1, p2));
+        when(productRepository.findAll(PageRequest.of(0, 10))).thenReturn(page);
 
-        when(dummyJsonClient.fetchProducts()).thenReturn(products);
-
-        Page<ProductDto> result = productService.getAllProducts(pageable);
+        Page<ProductDto> result = productService.getProducts(PageRequest.of(0, 10));
 
         assertEquals(2, result.getContent().size());
-        assertEquals(3, result.getTotalElements());
-        assertEquals("Product 1", result.getContent().get(0).title());
-        assertEquals("Product 2", result.getContent().get(1).title());
-
-        verify(dummyJsonClient).fetchProducts();
+        assertEquals("Phone", result.getContent().get(0).title());
+        verify(productRepository, times(1)).findAll(PageRequest.of(0, 10));
+        verifyNoInteractions(dummyJsonClient);
     }
 
     @Test
-    void getAllProducts_shouldReturnSecondPage() {
-        Pageable pageable = PageRequest.of(1, 2); // page 1, size 2
+    void testGetProducts_FromDummyJsonClient() {
+        when(productRepository.findAll(PageRequest.of(0, 10)))
+                .thenReturn(Page.empty());
 
-        when(dummyJsonClient.fetchProducts()).thenReturn(products);
+        ProductDto dto1 = new ProductDto(null, "Tablet", BigDecimal.valueOf(300));
+        ProductDto dto2 = new ProductDto(null, "Monitor", BigDecimal.valueOf(200));
+        when(dummyJsonClient.fetchProducts()).thenReturn(List.of(dto1, dto2));
 
-        Page<ProductDto> result = productService.getAllProducts(pageable);
+        ArgumentCaptor<List<Product>> captor = ArgumentCaptor.forClass(List.class);
+        when(productRepository.saveAll(captor.capture())).thenReturn(null);
+        when(productRepository.findAll(PageRequest.of(0, 10)))
+                .thenReturn(new PageImpl<>(List.of(
+                        new Product(1L, "Tablet", BigDecimal.valueOf(300)),
+                        new Product(2L, "Monitor", BigDecimal.valueOf(200))
+                )));
 
-        assertEquals(1, result.getContent().size());
-        assertEquals("Product 3", result.getContent().get(0).title());
+        Page<ProductDto> result = productService.getProducts(PageRequest.of(0, 10));
 
-        verify(dummyJsonClient).fetchProducts();
+        assertEquals(2, result.getContent().size());
+        assertEquals("Tablet", result.getContent().get(0).title());
+        verify(productRepository, times(1)).findAll(PageRequest.of(0, 10));
     }
 
     @Test
-    void getAllProducts_shouldReturnEmptyPageIfOutOfRange() {
-        Pageable pageable = PageRequest.of(5, 10); // page beyond total products
+    void testGetProduct_Found() {
+        Product product = new Product(1L, "Phone", BigDecimal.valueOf(500));
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
-        when(dummyJsonClient.fetchProducts()).thenReturn(products);
+        ProductDto result = productService.getProduct(1L);
 
-        Page<ProductDto> result = productService.getAllProducts(pageable);
-
-        assertTrue(result.isEmpty());
-
-        verify(dummyJsonClient).fetchProducts();
+        assertEquals("Phone", result.title());
+        assertEquals(BigDecimal.valueOf(500), result.price());
     }
 
     @Test
-    void getProductById_shouldReturnProduct() {
-        Product product = new Product(1L, "Product 1", BigDecimal.valueOf(10));
+    void testGetProduct_NotFound() {
+        when(productRepository.findById(999L)).thenReturn(Optional.empty());
 
-        when(dummyJsonClient.fetchProductById(1L)).thenReturn(Optional.of(product));
-
-        ProductDto dto = productService.getProductById(1L);
-
-        assertNotNull(dto);
-        assertEquals(1L, dto.id());
-        assertEquals("Product 1", dto.title());
-        assertEquals(BigDecimal.valueOf(10), dto.price());
-
-        verify(dummyJsonClient).fetchProductById(1L);
+        assertThrows(ProductNotFoundException.class, () -> productService.getProduct(999L));
     }
 
     @Test
-    void getProductById_shouldThrowIfNotFound() {
-        when(dummyJsonClient.fetchProductById(99L)).thenReturn(Optional.empty());
+    void testCreateProduct() {
+        Product product = new Product(1L, "Keyboard", BigDecimal.valueOf(100));
+        when(productRepository.save(any(Product.class))).thenReturn(product);
 
-        RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> productService.getProductById(99L));
+        ProductDto result = productService.createProduct("Keyboard", BigDecimal.valueOf(100));
 
-        assertEquals("Product not found with id: 99", ex.getMessage());
-
-        verify(dummyJsonClient).fetchProductById(99L);
+        assertEquals("Keyboard", result.title());
+        assertEquals(BigDecimal.valueOf(100), result.price());
+        verify(productRepository, times(1)).save(any(Product.class));
     }
 }

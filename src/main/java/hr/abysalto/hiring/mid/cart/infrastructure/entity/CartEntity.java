@@ -1,12 +1,9 @@
-package hr.abysalto.hiring.mid.cart.infrastructure.persistance.entity;
+package hr.abysalto.hiring.mid.cart.infrastructure.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "carts")

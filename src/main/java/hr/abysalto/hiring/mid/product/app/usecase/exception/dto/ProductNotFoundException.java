@@ -1,4 +1,4 @@
-package hr.abysalto.hiring.mid.product.app.usecase.exception;
+package hr.abysalto.hiring.mid.product.app.usecase.exception.dto;
 
 public class ProductNotFoundException extends RuntimeException {
     public ProductNotFoundException(Long message) {

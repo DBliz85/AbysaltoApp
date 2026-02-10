@@ -1,10 +1,6 @@
 package hr.abysalto.hiring.mid.user.domain;
 
-import hr.abysalto.hiring.mid.product.domain.Product;
-
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public final class User {
@@ -12,7 +8,7 @@ public final class User {
     private Long id;
     private String username;
     private String password;
-    private final Set<Product> favoriteProducts = new HashSet<>();
+    private final Set<Long> favoriteProductIds = new HashSet<>();
 
     public User(Long id, String username, String password) {
         if (username == null || username.isBlank()) throw new IllegalArgumentException("Username required");
@@ -22,16 +18,16 @@ public final class User {
         this.password = password;
     }
 
-    public void addFavorite(Product product) {
-        favoriteProducts.add(product);
+    public void addFavorite(Long productId) {
+        favoriteProductIds.add(productId);
     }
 
     public void removeFavorite(Long productId) {
-        favoriteProducts.removeIf(p -> p.getId().equals(productId));
+        favoriteProductIds.remove(productId);
     }
 
-    public List<Product> getFavorites() {
-        return new ArrayList<>(favoriteProducts);
+    public Set<Long> getFavoriteProductIds() {
+        return new HashSet<>(favoriteProductIds);
     }
 
     public Long getId() { return id; }

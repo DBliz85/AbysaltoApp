@@ -1,6 +1,7 @@
 package hr.abysalto.hiring.mid.user.web;
 
 import hr.abysalto.hiring.mid.user.app.usecase.UserService;
+import hr.abysalto.hiring.mid.user.dto.LoginResponse;
 import hr.abysalto.hiring.mid.user.dto.RegisterRequest;
 import hr.abysalto.hiring.mid.user.dto.UserDto;
 import jakarta.validation.Valid;
@@ -21,6 +22,11 @@ public class UserController {
     @GetMapping("/me")
     public UserDto me(Authentication auth) {
         return userService.findByUsername(auth.getName());
+    }
+
+    @PostMapping("/login")
+    public LoginResponse login(@RequestBody RegisterRequest request) {
+        return userService.login(request);
     }
 
     @PostMapping("/register")

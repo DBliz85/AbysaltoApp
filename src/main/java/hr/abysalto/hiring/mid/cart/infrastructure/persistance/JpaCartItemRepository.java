@@ -1,9 +1,9 @@
-package hr.abysalto.hiring.mid.cart.domain;
+package hr.abysalto.hiring.mid.cart.infrastructure.persistance;
 
-import hr.abysalto.hiring.mid.cart.infrastructure.persistance.CartItemRepository;
-import hr.abysalto.hiring.mid.cart.infrastructure.persistance.SpringCartItemJpaRepository;
-import hr.abysalto.hiring.mid.cart.infrastructure.persistance.entity.CartEntity;
-import hr.abysalto.hiring.mid.cart.infrastructure.persistance.entity.CartItemEntity;
+import hr.abysalto.hiring.mid.cart.domain.CartItem;
+import hr.abysalto.hiring.mid.cart.domain.CartItemRepository;
+import hr.abysalto.hiring.mid.cart.infrastructure.entity.CartEntity;
+import hr.abysalto.hiring.mid.cart.infrastructure.entity.CartItemEntity;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Repository;
 

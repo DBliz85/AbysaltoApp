@@ -1,8 +1,8 @@
 package hr.abysalto.hiring.mid.common.mapper;
 
 import hr.abysalto.hiring.mid.cart.domain.Cart;
-import hr.abysalto.hiring.mid.cart.infrastructure.persistance.entity.CartEntity;
-import hr.abysalto.hiring.mid.cart.infrastructure.persistance.entity.CartItemEntity;
+import hr.abysalto.hiring.mid.cart.infrastructure.entity.CartEntity;
+import hr.abysalto.hiring.mid.cart.infrastructure.entity.CartItemEntity;
 import hr.abysalto.hiring.mid.product.domain.Product;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +14,7 @@ public class CartEntityMapper {
 
         entity.getItems().forEach(i -> {
             cart.addItem(
-                    ProductMapper.toDto(new Product(i.getProductId(), i.getProductName(), i.getPrice())),
+                    new Product(i.getProductId(), i.getProductName(), i.getPrice()),
                     i.getQuantity());
         });
 

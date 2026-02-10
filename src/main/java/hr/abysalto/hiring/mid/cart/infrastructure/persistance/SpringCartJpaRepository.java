@@ -1,6 +1,6 @@
 package hr.abysalto.hiring.mid.cart.infrastructure.persistance;
 
-import hr.abysalto.hiring.mid.cart.infrastructure.persistance.entity.CartEntity;
+import hr.abysalto.hiring.mid.cart.infrastructure.entity.CartEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

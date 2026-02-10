@@ -1,8 +1,6 @@
-package hr.abysalto.hiring.mid.cart.infrastructure.persistance;
+package hr.abysalto.hiring.mid.cart.domain;
 
-import hr.abysalto.hiring.mid.cart.domain.Cart;
-import hr.abysalto.hiring.mid.cart.domain.CartItem;
-import hr.abysalto.hiring.mid.cart.infrastructure.persistance.entity.CartEntity;
+import hr.abysalto.hiring.mid.cart.infrastructure.entity.CartEntity;
 
 import java.util.List;
 import java.util.Optional;

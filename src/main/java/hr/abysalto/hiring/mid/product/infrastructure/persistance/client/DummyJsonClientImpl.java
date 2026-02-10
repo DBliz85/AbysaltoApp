@@ -10,27 +10,20 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Component
 public class DummyJsonClientImpl implements DummyJsonClient{
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public List<Product> fetchProducts() {
+    public List<ProductDto> fetchProducts() {
         String url = "https://dummyjson.com/products";
         DummyResponse response = restTemplate.getForObject(url, DummyResponse.class);
 
         if (response == null) {
             return List.of();
         }
-        return response.products.stream()
-                .map(dto -> new Product(
-                        dto.id(),
-                        dto.title(),
-                        dto.price()
-                ))
-                .collect(Collectors.toList());
+        return response.products.stream().toList();
     }
 
     @Override
