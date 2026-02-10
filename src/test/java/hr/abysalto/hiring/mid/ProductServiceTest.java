@@ -1,19 +1,23 @@
 package hr.abysalto.hiring.mid;
 
+import hr.abysalto.hiring.mid.product.app.usecase.port.out.ProductPersistencePort;
 import hr.abysalto.hiring.mid.product.domain.Product;
-import hr.abysalto.hiring.mid.product.infrastructure.persistance.ProductRepository;
-import hr.abysalto.hiring.mid.product.app.usecase.ProductService;
-import hr.abysalto.hiring.mid.user.domain.User;
-import hr.abysalto.hiring.mid.user.domain.UserRepository;
+import hr.abysalto.hiring.mid.product.app.usecase.service.ProductService;
+import hr.abysalto.hiring.mid.product.dto.ProductDto;
+import hr.abysalto.hiring.mid.product.infrastructure.persistance.client.DummyJsonClientImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,100 +27,89 @@ import static org.mockito.Mockito.*;
 public class ProductServiceTest {
 
     @Mock
-    private ProductRepository productRepository;
-
-    @Mock
-    private UserRepository userRepository;
+    private DummyJsonClientImpl dummyJsonClient;
 
     @InjectMocks
     private ProductService productService;
 
-    private User user;
-    private Product product;
+    private List<Product> products;
 
     @BeforeEach
-    void setup() {
-        user = new User(1L, "alice", "hash");
-        product = new Product(2L, "Laptop", BigDecimal.valueOf(1200));
+    void setUp() {
+        products = List.of(
+                new Product(1L, "Product 1", BigDecimal.valueOf(10)),
+                new Product(2L, "Product 2", BigDecimal.valueOf(20)),
+                new Product(3L, "Product 3", BigDecimal.valueOf(30))
+        );
+    }
+    @Test
+    void getAllProducts_shouldReturnFirstPage() {
+        Pageable pageable = PageRequest.of(0, 2);
+
+        when(dummyJsonClient.fetchProducts()).thenReturn(products);
+
+        Page<ProductDto> result = productService.getAllProducts(pageable);
+
+        assertEquals(2, result.getContent().size());
+        assertEquals(3, result.getTotalElements());
+        assertEquals("Product 1", result.getContent().get(0).title());
+        assertEquals("Product 2", result.getContent().get(1).title());
+
+        verify(dummyJsonClient).fetchProducts();
     }
 
     @Test
-    void testAddToFavorites_Success() {
-        when(userRepository.findByUsername("alice"))
-                .thenReturn(Optional.of(user));
-        when(productRepository.findById(2L))
-                .thenReturn(Optional.of(product));
-        when(userRepository.save(any(User.class)))
-                .thenAnswer(inv -> inv.getArgument(0));
+    void getAllProducts_shouldReturnSecondPage() {
+        Pageable pageable = PageRequest.of(1, 2); // page 1, size 2
 
-        productService.addToFavorites("alice", 2L);
+        when(dummyJsonClient.fetchProducts()).thenReturn(products);
 
-        assertEquals(1, user.getFavorites().size());
-        assertEquals(product, user.getFavorites().get(0));
+        Page<ProductDto> result = productService.getAllProducts(pageable);
 
-        verify(userRepository).save(user);
+        assertEquals(1, result.getContent().size());
+        assertEquals("Product 3", result.getContent().get(0).title());
+
+        verify(dummyJsonClient).fetchProducts();
     }
 
     @Test
-    void testAddToFavorites_UserNotFound() {
-        when(userRepository.findByUsername("alice"))
-                .thenReturn(Optional.empty());
+    void getAllProducts_shouldReturnEmptyPageIfOutOfRange() {
+        Pageable pageable = PageRequest.of(5, 10); // page beyond total products
+
+        when(dummyJsonClient.fetchProducts()).thenReturn(products);
+
+        Page<ProductDto> result = productService.getAllProducts(pageable);
+
+        assertTrue(result.isEmpty());
+
+        verify(dummyJsonClient).fetchProducts();
+    }
+
+    @Test
+    void getProductById_shouldReturnProduct() {
+        Product product = new Product(1L, "Product 1", BigDecimal.valueOf(10));
+
+        when(dummyJsonClient.fetchProductById(1L)).thenReturn(Optional.of(product));
+
+        ProductDto dto = productService.getProductById(1L);
+
+        assertNotNull(dto);
+        assertEquals(1L, dto.id());
+        assertEquals("Product 1", dto.title());
+        assertEquals(BigDecimal.valueOf(10), dto.price());
+
+        verify(dummyJsonClient).fetchProductById(1L);
+    }
+
+    @Test
+    void getProductById_shouldThrowIfNotFound() {
+        when(dummyJsonClient.fetchProductById(99L)).thenReturn(Optional.empty());
 
         RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> productService.addToFavorites("alice", 2L));
+                () -> productService.getProductById(99L));
 
-        assertEquals("User not found", ex.getMessage());
+        assertEquals("Product not found with id: 99", ex.getMessage());
 
-        verify(productRepository, never()).findById(anyLong());
-        verify(userRepository, never()).save(any());
-    }
-
-    @Test
-    void testAddToFavorites_ProductNotFound() {
-        when(userRepository.findByUsername("alice"))
-                .thenReturn(Optional.of(user));
-        when(productRepository.findById(2L))
-                .thenReturn(Optional.empty());
-
-        RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> productService.addToFavorites("alice", 2L));
-
-        assertEquals("Product not found", ex.getMessage());
-
-        verify(userRepository, never()).save(any());
-    }
-
-    @Test
-    void testAddToFavorites_DuplicateProductIgnored() {
-        when(userRepository.findByUsername("alice"))
-                .thenReturn(Optional.of(user));
-        when(productRepository.findById(2L))
-                .thenReturn(Optional.of(product));
-        when(userRepository.save(any(User.class)))
-                .thenAnswer(inv -> inv.getArgument(0));
-
-        productService.addToFavorites("alice", 2L);
-        productService.addToFavorites("alice", 2L);
-
-        assertEquals(1, user.getFavorites().size());
-        verify(userRepository, times(2)).save(user);
-    }
-
-    @Test
-    void testAddToFavorites_UserIsModifiedBeforeSave() {
-        when(userRepository.findByUsername("alice"))
-                .thenReturn(Optional.of(user));
-        when(productRepository.findById(2L))
-                .thenReturn(Optional.of(product));
-        when(userRepository.save(any(User.class)))
-                .thenAnswer(inv -> inv.getArgument(0));
-
-        productService.addToFavorites("alice", 2L);
-
-        ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
-        verify(userRepository).save(captor.capture());
-
-        User savedUser = captor.getValue();
-        assertTrue(savedUser.getFavorites().contains(product));
+        verify(dummyJsonClient).fetchProductById(99L);
     }
 }

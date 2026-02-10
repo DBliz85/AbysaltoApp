@@ -14,7 +14,7 @@ public class CartEntityMapper {
 
         entity.getItems().forEach(i -> {
             cart.addItem(
-                    new Product(i.getProductId(), i.getProductName(), i.getPrice()),
+                    ProductMapper.toDto(new Product(i.getProductId(), i.getProductName(), i.getPrice())),
                     i.getQuantity());
         });
 

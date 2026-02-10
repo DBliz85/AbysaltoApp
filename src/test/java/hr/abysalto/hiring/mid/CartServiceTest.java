@@ -1,11 +1,13 @@
 package hr.abysalto.hiring.mid;
 
+import hr.abysalto.hiring.mid.cart.app.usecase.CartService;
 import hr.abysalto.hiring.mid.cart.domain.Cart;
 import hr.abysalto.hiring.mid.cart.domain.CartItem;
 import hr.abysalto.hiring.mid.cart.infrastructure.persistance.CartRepository;
-import hr.abysalto.hiring.mid.cart.app.usecase.CartService;
+import hr.abysalto.hiring.mid.common.mapper.ProductMapper;
+import hr.abysalto.hiring.mid.product.app.usecase.port.in.ProductUseCase;
 import hr.abysalto.hiring.mid.product.domain.Product;
-import hr.abysalto.hiring.mid.product.infrastructure.persistance.ProductRepository;
+import hr.abysalto.hiring.mid.product.dto.ProductDto;
 import hr.abysalto.hiring.mid.user.domain.User;
 import hr.abysalto.hiring.mid.user.domain.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +33,7 @@ public class CartServiceTest {
     CartRepository cartRepository;
 
     @Mock
-    ProductRepository productRepository;
+    ProductUseCase productRepository;
 
     @Mock
     UserRepository userRepository;
@@ -63,7 +65,7 @@ public class CartServiceTest {
         cart = cartService.getCart(authentication);
 
         assertEquals(existingCart, cart);
-        verify(cartRepository, never()).save(any()); // should not save new cart
+        verify(cartRepository, never()).save(any());
     }
 
     @Test
@@ -86,7 +88,9 @@ public class CartServiceTest {
         when(userRepository.findByUsername("dejan")).thenReturn(Optional.of(user));
         when(cartRepository.findByUserId(user.getId())).thenReturn(Optional.of(cart));
         when(cartRepository.save(any(Cart.class))).thenAnswer(i -> i.getArgument(0));
-        when(productRepository.findById(10L)).thenReturn(Optional.of(product));
+        ProductDto productDto = new ProductDto(10L,"Test Product", BigDecimal.valueOf(100));
+
+        when(productRepository.getProductById(10L)).thenReturn(productDto);
 
         cart = cartService.addItem(authentication, 10L, 2);
 
@@ -96,13 +100,13 @@ public class CartServiceTest {
         CartItem item = cart.getItems().get(0);
         assertEquals(product.getId(), item.getProductId());
         assertEquals(2, item.getQuantity());
-        verify(cartRepository, times(1)).save(any(Cart.class)); // one for new cart, one after adding item
+        verify(cartRepository, times(1)).save(any(Cart.class));
     }
 
     @Test
     void testRemoveItem_Success() {
         Cart cart = new Cart(1L, user.getId(), new ArrayList<>());
-        cart.addItem(product, 2);
+        cart.addItem(ProductMapper.toDto(product), 2);
 
         when(authentication.getName()).thenReturn("dejan");
         when(userRepository.findByUsername("dejan")).thenReturn(Optional.of(user));
@@ -125,17 +129,5 @@ public class CartServiceTest {
                 () -> cartService.getCart(authentication));
 
         assertEquals("User not found", exception.getMessage());
-    }
-
-    @Test
-    void testGetProduct_NotFound() {
-        when(authentication.getName()).thenReturn("dejan");
-        when(userRepository.findByUsername("dejan")).thenReturn(Optional.of(user));
-        when(productRepository.findById(999L)).thenReturn(Optional.empty());
-
-        RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> cartService.addItem(authentication, 999L, 1));
-
-        assertEquals("Product not found", exception.getMessage());
     }
 }
