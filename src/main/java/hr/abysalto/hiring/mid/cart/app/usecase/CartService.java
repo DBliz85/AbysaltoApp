@@ -1,6 +1,6 @@
 package hr.abysalto.hiring.mid.cart.app.usecase;
 
-import hr.abysalto.hiring.mid.cart.domain.CartRepository;
+import hr.abysalto.hiring.mid.cart.infrastructure.persistance.CartRepository;
 import hr.abysalto.hiring.mid.cart.domain.Cart;
 import hr.abysalto.hiring.mid.product.domain.Product;
 import hr.abysalto.hiring.mid.user.domain.User;
@@ -28,22 +28,29 @@ public class CartService {
 
     public Cart getCart(Authentication auth) {
         User user = getUser(auth);
-        return cartRepository.findByUser(user)
+        return cartRepository.findByUserId(user.getId())
                 .orElseGet(() -> cartRepository.save(new Cart(user.getId())));
     }
 
-    public Cart addItem(Authentication auth, Long productId, int quantity) {
-        User user = getUser(auth);
-        Cart cart = cartRepository.findByUser(user)
+    @Transactional
+    public Cart addItem(Authentication authentication, Long productId, int quantity) {
+        User user = userRepository.findByUsername(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        Cart cart = cartRepository.findByUserId(user.getId())
                 .orElseGet(() -> cartRepository.save(new Cart(user.getId())));
-        Product product = getProduct(productId);
+
         cart.addItem(product, quantity);
+
         return cartRepository.save(cart);
     }
 
     public Cart removeItem(Authentication auth, Long productId) {
         User user = getUser(auth);
-        Cart cart = cartRepository.findByUser(user)
+        Cart cart = cartRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
 
         cart.removeItem(productId);

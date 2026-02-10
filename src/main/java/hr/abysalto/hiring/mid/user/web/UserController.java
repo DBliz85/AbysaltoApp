@@ -1,17 +1,15 @@
 package hr.abysalto.hiring.mid.user.web;
 
-import hr.abysalto.hiring.mid.common.mapper.UserMapper;
 import hr.abysalto.hiring.mid.user.app.usecase.UserService;
-import hr.abysalto.hiring.mid.user.domain.User;
 import hr.abysalto.hiring.mid.user.dto.RegisterRequest;
 import hr.abysalto.hiring.mid.user.dto.UserDto;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("v1/api/auth")
 public class UserController {
 
     private final UserService userService;

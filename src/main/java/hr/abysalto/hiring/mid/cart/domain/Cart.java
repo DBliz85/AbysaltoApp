@@ -2,43 +2,66 @@ package hr.abysalto.hiring.mid.cart.domain;
 
 import hr.abysalto.hiring.mid.product.domain.Product;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Cart {
 
-    private final Long userId;
-    private final Set<CartItem> items = new HashSet<>();
+    private Long id;
+    private Long userId;
+    private List<CartItem> items = new ArrayList<>();
+
+    public Cart(Long id, Long userId, List<CartItem> items) {
+        this.id = id;
+        this.userId = userId;
+        if (items != null) this.items = items;
+    }
 
     public Cart(Long userId) {
         this.userId = userId;
     }
 
-    public Long getUserId() { return userId; }
-    public Set<CartItem> getItems() { return Set.copyOf(items); }
-
     public void addItem(Product product, int quantity) {
-        CartItem item = items.stream()
-                .filter(i -> i.getProduct().equals(product))
+        if (this.id == null) {
+            throw new IllegalStateException("Cart ID must not be null before adding items");
+        }
+
+        CartItem existing = items.stream()
+                .filter(i -> i.getProductId().equals(product.getId()))
                 .findFirst()
-                .orElseGet(() -> {
-                    CartItem newItem = new CartItem(this, product, 0);
-                    items.add(newItem);
-                    return newItem;
-                });
-        item.increaseQuantity(quantity);
+                .orElse(null);
+
+        if (existing != null) {
+            items.remove(existing);
+            items.add(existing.increaseQuantity(quantity));
+        } else {
+            items.add(CartItem.fromProduct(
+                    product.getId(),
+                    product.getTitle(),
+                    product.getPrice(),
+                    quantity
+            ));
+        }
     }
 
     public void removeItem(Long productId) {
-        items.removeIf(i -> i.getProduct().getId().equals(productId));
+        items.removeIf(item -> item.getProductId().equals(productId));
     }
 
-    public boolean isEmpty() { return items.isEmpty(); }
+    public boolean isEmpty() {
+        return items.isEmpty();
+    }
 
-    public Optional<CartItem> findItem(Long productId) {
-        return items.stream()
-                .filter(i -> i.getProduct().getId().equals(productId))
-                .findFirst();
+    // Getters
+    public Long getId() {
+        return id;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public List<CartItem> getItems() {
+        return items;
     }
 }

@@ -13,7 +13,7 @@ public class ProductMapper {
     public static ProductDto toDto(Product product) {
         return new ProductDto(
                 product.getId(),
-                product.getName(),
+                product.getTitle(),
                 product.getPrice()
         );
     }
@@ -22,12 +22,12 @@ public class ProductMapper {
         if (product == null) return null;
         return new ProductEntity(
                 null,
-                product.getName(),
+                product.getTitle(),
                 product.getPrice()
         );
     }
 
     public static Product toDomain(ProductEntity entity) {
-        return new Product(entity.getId(), entity.getName(), entity.getPrice());
+        return new Product(entity.getId(), entity.getTitle(), entity.getPrice());
     }
 }

@@ -1,5 +1,6 @@
 package hr.abysalto.hiring.mid.product.domain;
 
+import hr.abysalto.hiring.mid.product.dto.ProductDto;
 import hr.abysalto.hiring.mid.product.infrastructure.persistance.ProductRepository;
 import hr.abysalto.hiring.mid.product.infrastructure.persistance.SpringProductJpaRepository;
 import hr.abysalto.hiring.mid.product.infrastructure.persistance.entity.ProductEntity;
@@ -37,13 +38,13 @@ public class JpaProductRepository implements ProductRepository {
         return ProductMapper.toDomain(saved);
     }
 
-    public List<ProductEntity> saveAll(List<Product> products) {
+    public List<ProductEntity> saveAll(List<ProductDto> products) {
         List<ProductEntity> entities = products.stream()
                 .map(dto -> {
                     ProductEntity entity = new ProductEntity();
                     entity.setId(null);
-                    entity.setName(dto.getName());
-                    entity.setPrice(dto.getPrice());
+                    entity.setTitle(dto.title());
+                    entity.setPrice(dto.price());
                     return entity;
                 })
                 .toList();

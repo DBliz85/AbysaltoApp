@@ -21,10 +21,10 @@ public class CartMapper {
 
     private CartItemResponse toItemResponse(CartItem item) {
         return new CartItemResponse(
-                item.getProduct().getId(),
-                item.getProduct().getName(),
+                item.getProductId(),
+                item.getProductName(),
                 item.getQuantity(),
-                item.getProduct().getPrice()
+                item.getPrice()
         );
     }
 }

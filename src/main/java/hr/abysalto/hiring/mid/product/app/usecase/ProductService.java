@@ -2,6 +2,7 @@ package hr.abysalto.hiring.mid.product.app.usecase;
 
 import hr.abysalto.hiring.mid.common.mapper.ProductMapper;
 import hr.abysalto.hiring.mid.infrastructure.client.DummyJsonClient;
+import hr.abysalto.hiring.mid.product.app.usecase.exception.ProductNotFoundException;
 import hr.abysalto.hiring.mid.product.domain.Product;
 import hr.abysalto.hiring.mid.product.dto.ProductDto;
 import hr.abysalto.hiring.mid.product.infrastructure.persistance.ProductRepository;
@@ -32,9 +33,9 @@ public class ProductService {
         Page<Product> products = productRepository.findAll(pageable);
 
         if (products.isEmpty()) {
-            List<Product> fetchedProducts = dummyJsonClient.fetchProducts(); // entities
+            List<ProductDto> fetchedProducts = dummyJsonClient.fetchProducts();
             productRepository.saveAll(fetchedProducts);
-            products = productRepository.findAll(pageable); // fetch saved entities again
+            products = productRepository.findAll(pageable);
         }
 
         return products.map(ProductMapper::toDto);
@@ -42,7 +43,7 @@ public class ProductService {
 
     public ProductDto getProduct(Long id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new ProductNotFoundException(id));
         return ProductMapper.toDto(product);
     }
 

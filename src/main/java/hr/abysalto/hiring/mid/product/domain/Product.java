@@ -8,15 +8,15 @@ import java.math.BigDecimal;
 public class Product {
 
     private final Long id;
-    private final String name;
+    private final String title;
     private final BigDecimal price;
 
-    public Product(Long id, String name, BigDecimal price) {
-        if (name == null || name.isBlank()) throw new IllegalArgumentException("Product name must not be blank");
+    public Product(Long id, String title, BigDecimal price) {
+        if (title == null || title.isBlank()) throw new IllegalArgumentException("Product title must not be blank");
         if (price == null) throw new IllegalArgumentException("Price must not be null");
 
         this.id = id;
-        this.name = name;
+        this.title = title;
         this.price = price;
     }
 }
