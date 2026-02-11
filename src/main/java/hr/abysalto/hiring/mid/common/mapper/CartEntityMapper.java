@@ -6,7 +6,11 @@ import hr.abysalto.hiring.mid.cart.infrastructure.entity.CartEntity;
 import hr.abysalto.hiring.mid.cart.infrastructure.entity.CartItemEntity;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toList;
 
 @Component
 public class CartEntityMapper {
@@ -15,7 +19,7 @@ public class CartEntityMapper {
 
         List<CartItem> items = entity.getItems().stream()
                 .map(this::toDomainItem)
-                .toList();
+                .collect(collectingAndThen(toList(), ArrayList::new));
 
         return new Cart(
                 entity.getId(),

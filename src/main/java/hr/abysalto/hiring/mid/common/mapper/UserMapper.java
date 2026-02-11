@@ -10,7 +10,9 @@ import org.springframework.stereotype.Component;
 public class UserMapper {
 
     public static User toDomain(UserEntity entity) {
-        return new User(entity.getId(), entity.getUsername(), entity.getPassword());
+        var user = new User(entity.getId(), entity.getUsername(), entity.getPassword());
+        user.overwriteFavorites(entity.getFavoriteProductIds());
+        return user;
     }
 
     public static UserEntity toEntity(User domain) {
@@ -20,6 +22,7 @@ public class UserMapper {
         entity.setId(domain.getId());
         entity.setUsername(domain.getUsername());
         entity.setPassword(domain.getPassword());
+        entity.setFavoriteProductIds(domain.getFavoriteProductIds());
 
         return entity;
     }

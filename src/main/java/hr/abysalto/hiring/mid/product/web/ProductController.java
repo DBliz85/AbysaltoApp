@@ -22,7 +22,7 @@ public class ProductController {
     }
 
     @GetMapping
-    public Page<ProductDto> getProducts(@PageableDefault(size = 10, sort = "title", direction = Sort.Direction.ASC) Pageable pageable) {
+    public Page<ProductDto> getProducts(@PageableDefault(size = 20, sort = "title", direction = Sort.Direction.ASC) Pageable pageable) {
         return productService.getProducts(pageable);
     }
 

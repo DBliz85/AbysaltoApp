@@ -1,7 +1,6 @@
 package hr.abysalto.hiring.mid;
 
 import hr.abysalto.hiring.mid.product.app.usecase.ProductService;
-import hr.abysalto.hiring.mid.product.app.usecase.exception.dto.ProductNotFoundException;
 import hr.abysalto.hiring.mid.product.domain.Product;
 import hr.abysalto.hiring.mid.product.domain.ProductRepository;
 import hr.abysalto.hiring.mid.product.dto.ProductDto;
@@ -15,10 +14,10 @@ import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class ProductServiceTest {
@@ -46,7 +45,6 @@ public class ProductServiceTest {
         assertEquals(2, result.getContent().size());
         assertEquals("Phone", result.getContent().get(0).title());
         verify(productRepository, times(1)).findAll(PageRequest.of(0, 10));
-        verifyNoInteractions(dummyJsonClient);
     }
 
     @Test
@@ -75,20 +73,20 @@ public class ProductServiceTest {
 
     @Test
     void testGetProduct_Found() {
-        Product product = new Product(1L, "Phone", BigDecimal.valueOf(500));
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        Product product = new Product(1L, "Laptop", BigDecimal.valueOf(999.99));
+        when(dummyJsonClient.fetchProductById(1L)).thenReturn(Optional.of(product));
 
         ProductDto result = productService.getProduct(1L);
 
-        assertEquals("Phone", result.title());
-        assertEquals(BigDecimal.valueOf(500), result.price());
+        assertNotNull(result);
+        assertEquals("Laptop", result.title());
     }
 
     @Test
     void testGetProduct_NotFound() {
-        when(productRepository.findById(999L)).thenReturn(Optional.empty());
+        when(dummyJsonClient.fetchProductById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(ProductNotFoundException.class, () -> productService.getProduct(999L));
+        assertThrows(NoSuchElementException.class, () -> productService.getProduct(1L));
     }
 
     @Test

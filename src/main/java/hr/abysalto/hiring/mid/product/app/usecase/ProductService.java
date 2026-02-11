@@ -1,7 +1,6 @@
 package hr.abysalto.hiring.mid.product.app.usecase;
 
 import hr.abysalto.hiring.mid.common.mapper.ProductMapper;
-import hr.abysalto.hiring.mid.product.app.usecase.exception.dto.ProductNotFoundException;
 import hr.abysalto.hiring.mid.product.domain.Product;
 import hr.abysalto.hiring.mid.product.domain.ProductRepository;
 import hr.abysalto.hiring.mid.product.dto.ProductDto;
@@ -27,9 +26,8 @@ public class ProductService {
     @Transactional
     public Page<ProductDto> getProducts(Pageable pageable) {
         Page<Product> products = productRepository.findAll(pageable);
-
+        List<ProductDto> fetchedProducts = dummyJsonClient.fetchProducts();
         if (products.isEmpty()) {
-            List<ProductDto> fetchedProducts = dummyJsonClient.fetchProducts();
             List<Product> domainProducts = fetchedProducts.stream()
                     .map(dto -> new Product(null, dto.title(), dto.price()))
                     .toList();
@@ -41,9 +39,7 @@ public class ProductService {
     }
 
     public ProductDto getProduct(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException(id));
-        return ProductMapper.toDto(product);
+        return dummyJsonClient.fetchProductById(id).map(ProductMapper::toDto).orElseThrow();
     }
 
     public ProductDto createProduct(String name, BigDecimal price) {

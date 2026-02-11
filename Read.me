@@ -87,8 +87,6 @@ Response example:
 }
 
 
-
-
 Go to Authorization tab → Type: Basic Auth
 
 Use the username and password from login
@@ -101,30 +99,48 @@ Response :
     "username": "dejan"
 }
 
-/v1/api/products
+GET /v1/api/products
 
 Need to call this API without authentication (username and password)
 
 Response : { return a list of products from the URL https://dummyjson.com/products  }
 
-/v1/api/products/1
+/v1/api/products/11
 
 Get product by ID
 In this case the username and password need to be sent in authorization tab
 
 Response:
 {
-    "id": 1,
-    "title": "Essence Mascara Lash Princess",
-    "price": 9.99
+     "id": 11,
+     "title": "Annibale Colombo Bed",
+     "price": 1899.99
 }
 
 POST /v1/api/favorites/11
-Adds product with ID = 11 to the favorite list of the user that will be sent
-in the authorization tab
+Adds product with ID = 11 to the favorite list of the user
+username and password need to be sent in the authorization tab
+
+Response 201 CREATED
 
 GET /v1/api/favorites
-Return a list of the products that are added with the previous POST
+Return a list of the products that are added as favorites
+
+Response:
+{
+    "favorites": [
+        {
+            "id": 11,
+            "title": "Annibale Colombo Bed",
+            "price": 1899.99
+        },
+        {
+            "id": 14,
+            "title": "Knoll Saarinen Executive Conference Chair",
+            "price": 499.99
+        }
+    ]
+}
 
 Add items to cart example:
 POST http://localhost:8080/v1/api/cart/items
@@ -138,8 +154,13 @@ Body:
 
 Response:
 {
-    "cartId": null,
-    "items": []
+    "cartId": 1,
+    "items": [
+        {
+            "productId": 1,
+            "quantity": 2
+        }
+    ]
 }
 
 GET http://localhost:8080/v1/api/cart - Retrieve users current cart
@@ -147,16 +168,35 @@ username and password included return the users cart
 
 Response :
 {
-    "cartId": null,
-    "items": []
+    "cartId": 1,
+    "items": [
+        {
+            "productId": 1,
+            "quantity": 2
+        },
+        {
+            "productId": 12,
+            "quantity": 3
+        }
+    ]
 }
 
 Remove item from cart example:
 
 DELETE http://localhost:8080/v1/api/cart/items/1
 
+Response:
+{
+    "cartId": 1,
+    "items": [
+        {
+            "productId": 12,
+            "quantity": 3
+        }
+    ]
+}
+
 7️⃣ Notes
-
-Pagination for products: default size=10, sort=title ASC.
-
+Pagination for products: default size=20, sort=title ASC.
 Adding the same product to cart increases quantity automatically.
+The postman collection is under resources/postman folder, it can be imported and used for testing

@@ -16,7 +16,7 @@ public class CartMapper {
                 .map(this::toItemResponse)
                 .toList();
 
-        return new CartDto(null, items);
+        return new CartDto(cart.getId(), items);
     }
 
     private CartItemResponse toItemResponse(CartItem item) {
