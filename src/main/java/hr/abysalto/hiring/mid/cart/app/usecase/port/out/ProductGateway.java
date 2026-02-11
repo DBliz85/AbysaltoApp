@@ -1,4 +1,4 @@
-package hr.abysalto.hiring.mid.user.app.out;
+package hr.abysalto.hiring.mid.cart.app.usecase.port.out;
 
 import hr.abysalto.hiring.mid.shared.readmodel.ProductView;
 

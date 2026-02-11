@@ -1,38 +1,54 @@
 package hr.abysalto.hiring.mid.common.mapper;
 
 import hr.abysalto.hiring.mid.cart.domain.Cart;
+import hr.abysalto.hiring.mid.cart.domain.CartItem;
 import hr.abysalto.hiring.mid.cart.infrastructure.entity.CartEntity;
 import hr.abysalto.hiring.mid.cart.infrastructure.entity.CartItemEntity;
-import hr.abysalto.hiring.mid.product.domain.Product;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class CartEntityMapper {
 
     public Cart toDomain(CartEntity entity) {
-        Cart cart = new Cart(entity.getUserId());
 
-        entity.getItems().forEach(i -> {
-            cart.addItem(
-                    new Product(i.getProductId(), i.getProductName(), i.getPrice()),
-                    i.getQuantity());
-        });
+        List<CartItem> items = entity.getItems().stream()
+                .map(this::toDomainItem)
+                .toList();
 
-        return cart;
+        return new Cart(
+                entity.getId(),
+                entity.getUserId(),
+                items
+        );
     }
 
     public CartEntity toEntity(Cart cart) {
-        CartEntity entity = new CartEntity(cart.getUserId());
 
-        cart.getItems().forEach(item -> {
-            CartItemEntity itemEntity = new CartItemEntity(
-                    item.getProductId(),
-                    item.getProductName(),
-                    item.getPrice(),
-                    item.getQuantity()
-            );
-            entity.addItem(itemEntity);
-        });
+        CartEntity entity = new CartEntity(cart.getId(), cart.getUserId());
+
+        List<CartItemEntity> itemEntities = cart.getItems().stream()
+                .map(item -> toEntityItem(item, entity))
+                .toList();
+
+        entity.getItems().clear();
+        entity.getItems().addAll(itemEntities);
+
+        return entity;
+    }
+
+    public CartItem toDomainItem(CartItemEntity entity) {
+        return new CartItem(
+                entity.getProductId(),
+                entity.getQuantity()
+        );
+    }
+
+    public CartItemEntity toEntityItem(CartItem item, CartEntity cartEntity) {
+
+        CartItemEntity entity = new CartItemEntity(item.getProductId(),item.getQuantity());
+        entity.setCart(cartEntity);
 
         return entity;
     }

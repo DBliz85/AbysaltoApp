@@ -1,7 +1,5 @@
 package hr.abysalto.hiring.mid.cart.domain;
 
-import hr.abysalto.hiring.mid.product.domain.Product;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,26 +19,16 @@ public class Cart {
         this.userId = userId;
     }
 
-    public void addItem(Product product, int quantity) {
-        if (this.id == null) {
-            throw new IllegalStateException("Cart ID must not be null before adding items");
-        }
-
+    public void addItem(Long productId, int quantity) {
         CartItem existing = items.stream()
-                .filter(i -> i.getProductId().equals(product.getId()))
+                .filter(i -> i.getProductId().equals(productId))
                 .findFirst()
                 .orElse(null);
 
         if (existing != null) {
-            items.remove(existing);
-            items.add(existing.increaseQuantity(quantity));
+            existing.increaseQuantity(quantity);
         } else {
-            items.add(CartItem.fromProduct(
-                    product.getId(),
-                    product.getTitle(),
-                    product.getPrice(),
-                    quantity
-            ));
+            items.add(new CartItem(productId, quantity));
         }
     }
 
@@ -52,16 +40,7 @@ public class Cart {
         return items.isEmpty();
     }
 
-    // Getters
-    public Long getId() {
-        return id;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public List<CartItem> getItems() {
-        return items;
-    }
+    public Long getId() { return id; }
+    public Long getUserId() { return userId; }
+    public List<CartItem> getItems() { return items; }
 }

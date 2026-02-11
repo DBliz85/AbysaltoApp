@@ -1,65 +1,65 @@
 package hr.abysalto.hiring.mid.cart.app.usecase;
 
+import hr.abysalto.hiring.mid.cart.app.usecase.port.out.ProductGateway;
+import hr.abysalto.hiring.mid.cart.app.usecase.port.out.UserGateway;
 import hr.abysalto.hiring.mid.cart.domain.Cart;
 import hr.abysalto.hiring.mid.cart.domain.CartRepository;
-import hr.abysalto.hiring.mid.product.domain.Product;
-import hr.abysalto.hiring.mid.product.domain.ProductRepository;
-import hr.abysalto.hiring.mid.user.domain.User;
-import hr.abysalto.hiring.mid.user.domain.UserRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 @Transactional
 public class CartService {
 
     private final CartRepository cartRepository;
-    private final ProductRepository productRepository;
-    private final UserRepository userRepository;
+    private final UserGateway userGateway;
+    private final ProductGateway productGateway;
 
     public CartService(CartRepository cartRepository,
-                       ProductRepository productRepository,
-                       UserRepository userRepository) {
+                       UserGateway userGateway,
+                       ProductGateway productGateway) {
         this.cartRepository = cartRepository;
-        this.productRepository = productRepository;
-        this.userRepository = userRepository;
+        this.userGateway = userGateway;
+        this.productGateway = productGateway;
     }
 
-    public Cart getCart(Authentication auth) {
-        User user = getUser(auth);
-        return cartRepository.findByUserId(user.getId())
-                .orElseGet(() -> cartRepository.save(new Cart(user.getId())));
+    public Cart getCart(String username) {
+        Long userId = userGateway.getUserIdByUsername(username);
+
+        return cartRepository.findByUserId(userId)
+                .orElseGet(() -> cartRepository.save(new Cart(userId)));
     }
 
-    @Transactional
-    public Cart addItem(Authentication authentication, Long productId, int quantity) {
-        User user = userRepository.findByUsername(authentication.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public Cart addItem(String username, Long productId, int quantity) {
+        Long userId = userGateway.getUserIdByUsername(username);
 
-        Optional<Product> product = productRepository.findById(productId);
+        if (!productGateway.exists(productId)) {
+            throw new RuntimeException("Product not found");
+        }
 
-        Cart cart = cartRepository.findByUserId(user.getId())
-                .orElseGet(() -> cartRepository.save(new Cart(user.getId())));
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseGet(() -> cartRepository.save(new Cart(userId)));
 
-        cart.addItem(product.orElse(null), quantity);
+        cart.addItem(productId, quantity);
 
         return cartRepository.save(cart);
     }
 
-    public Cart removeItem(Authentication auth, Long productId) {
-        User user = getUser(auth);
-        Cart cart = cartRepository.findByUserId(user.getId())
+    public Cart removeItem(String username, Long productId) {
+        Long userId = userGateway.getUserIdByUsername(username);
+
+        Cart cart = cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
 
-        cart.removeItem(productId);
-        return cartRepository.save(cart);
-    }
+        boolean exists = cart.getItems().stream()
+                .anyMatch(item -> item.getProductId().equals(productId));
 
-    private User getUser(Authentication auth) {
-        return userRepository.findByUsername(auth.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        if (!exists) {
+            throw new RuntimeException("Product not found in cart");
+        }
+
+        cart.removeItem(productId);
+
+        return cartRepository.save(cart);
     }
 }

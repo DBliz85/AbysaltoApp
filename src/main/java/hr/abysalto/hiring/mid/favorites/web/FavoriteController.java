@@ -29,7 +29,7 @@ public class FavoriteController {
         favoriteService.removeFavorite(authentication.getName(), productId);
     }
 
-    @GetMapping("/getAll")
+    @GetMapping()
     public FavoritesDto getFavorites(Authentication authentication) {
         return FavoritesMapper.toFavoritesDto(favoriteService.getFavorites(authentication.getName()));
     }

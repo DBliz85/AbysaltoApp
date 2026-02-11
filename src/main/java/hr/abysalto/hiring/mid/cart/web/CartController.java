@@ -23,7 +23,7 @@ public class CartController {
 
     @GetMapping
     public CartDto getCart(Authentication authentication) {
-        return cartMapper.toResponse(cartService.getCart(authentication));
+        return cartMapper.toResponse(cartService.getCart(authentication.getName()));
     }
 
     @PostMapping("/items")
@@ -32,7 +32,7 @@ public class CartController {
             Authentication authentication,
             @Valid @RequestBody AddToCartRequest request) {
         return cartMapper.toResponse(
-                cartService.addItem(authentication, request.productId(), request.quantity())
+                cartService.addItem(authentication.getName(), request.productId(), request.quantity())
         );
     }
 
@@ -41,7 +41,7 @@ public class CartController {
             Authentication authentication,
             @PathVariable Long productId) {
         return cartMapper.toResponse(
-                cartService.removeItem(authentication, productId)
+                cartService.removeItem(authentication.getName(), productId)
         );
     }
 }

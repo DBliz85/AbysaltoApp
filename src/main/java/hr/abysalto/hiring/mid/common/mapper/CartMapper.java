@@ -22,9 +22,7 @@ public class CartMapper {
     private CartItemResponse toItemResponse(CartItem item) {
         return new CartItemResponse(
                 item.getProductId(),
-                item.getProductName(),
-                item.getQuantity(),
-                item.getPrice()
+                item.getQuantity()
         );
     }
 }

@@ -30,6 +30,11 @@ public final class User {
         return new HashSet<>(favoriteProductIds);
     }
 
+    public void overwriteFavorites(Set<Long> favoriteProductIds) {
+        this.favoriteProductIds.clear();
+        this.favoriteProductIds.addAll(favoriteProductIds);
+    }
+
     public Long getId() { return id; }
     public String getUsername() { return username; }
     public String getPassword() { return password;}

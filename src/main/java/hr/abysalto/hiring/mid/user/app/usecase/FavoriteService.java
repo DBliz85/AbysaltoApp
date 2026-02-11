@@ -2,7 +2,7 @@ package hr.abysalto.hiring.mid.user.app.usecase;
 
 import hr.abysalto.hiring.mid.product.app.usecase.exception.dto.ProductNotFoundException;
 import hr.abysalto.hiring.mid.shared.readmodel.ProductView;
-import hr.abysalto.hiring.mid.user.app.out.ProductGateway;
+import hr.abysalto.hiring.mid.user.app.port.out.ProductGateway;
 import hr.abysalto.hiring.mid.user.domain.User;
 import hr.abysalto.hiring.mid.user.domain.UserRepository;
 import org.springframework.stereotype.Service;

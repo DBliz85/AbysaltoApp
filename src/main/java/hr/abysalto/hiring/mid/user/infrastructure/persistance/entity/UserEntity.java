@@ -1,7 +1,5 @@
 package hr.abysalto.hiring.mid.user.infrastructure.persistance.entity;
 
-
-import hr.abysalto.hiring.mid.product.infrastructure.persistance.entity.ProductEntity;
 import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
 
@@ -23,13 +21,13 @@ public class UserEntity {
     @Column(nullable = false)
     private String password;
 
-    @ManyToMany
-    @JoinTable(
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
             name = "user_favorites",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "product_id")
+            joinColumns = @JoinColumn(name = "user_id")
     )
-    private Set<ProductEntity> favoriteProducts = new HashSet<>();
+    @Column(name = "product_id")
+    private Set<Long> favoriteProductIds = new HashSet<>();
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -40,16 +38,16 @@ public class UserEntity {
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
 
-    public Set<ProductEntity> getFavoriteProducts() { return favoriteProducts; }
-    public void setFavoriteProducts(Set<ProductEntity> favoriteProducts) {
-        this.favoriteProducts = favoriteProducts;
+    public Set<Long> getFavoriteProductIds() { return favoriteProductIds; }
+    public void setFavoriteProductIds(Set<Long> favoriteProductIds) {
+        this.favoriteProductIds = favoriteProductIds;
     }
 
-    public void addFavorite(ProductEntity product) {
-        favoriteProducts.add(product);
+    public void addFavorite(Long productId) {
+        favoriteProductIds.add(productId);
     }
 
     public void removeFavorite(Long productId) {
-        favoriteProducts.removeIf(p -> p.getId().equals(productId));
+        favoriteProductIds.remove(productId);
     }
 }

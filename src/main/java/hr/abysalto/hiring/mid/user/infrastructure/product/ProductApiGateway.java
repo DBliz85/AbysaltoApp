@@ -2,7 +2,7 @@ package hr.abysalto.hiring.mid.user.infrastructure.product;
 
 import hr.abysalto.hiring.mid.product.app.port.in.ProductQueryPort;
 import hr.abysalto.hiring.mid.shared.readmodel.ProductView;
-import hr.abysalto.hiring.mid.user.app.out.ProductGateway;
+import hr.abysalto.hiring.mid.user.app.port.out.ProductGateway;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,6 +23,6 @@ public class ProductApiGateway implements ProductGateway {
 
     @Override
     public List<ProductView> getProducts(Set<Long> ids) {
-        return List.of();
+        return productQuery.getByIds(ids);
     }
 }

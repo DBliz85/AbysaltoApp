@@ -23,6 +23,22 @@ public class JpaUserRepository implements UserRepository {
 
     @Override
     public User save(User user) {
-        return UserMapper.toDomain(springRepo.save(UserMapper.toEntity(user)));
+        UserEntity entityToSave;
+
+        if (user.getId() == null) {
+            entityToSave = UserMapper.toEntity(user);
+        } else {
+            entityToSave = springRepo.findById(user.getId())
+                    .map(existing -> {
+                        existing.setUsername(user.getUsername());
+                        existing.setPassword(user.getPassword());
+                        existing.setFavoriteProductIds(user.getFavoriteProductIds());
+                        return existing;
+                    })
+                    // If the ID was set but doesn't exist in DB, fall back to mapping
+                    .orElseGet(() -> UserMapper.toEntity(user));
+        }
+
+        return UserMapper.toDomain(springRepo.save(entityToSave));
     }
 }

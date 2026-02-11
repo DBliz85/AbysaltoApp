@@ -54,4 +54,9 @@ public class JpaProductRepository implements ProductRepository {
     public Collection<Product> findAllById(Set<Long> ids) {
         return springRepo.findAllById(ids).stream().map(ProductMapper::toDomain).toList();
     }
+
+    @Override
+    public boolean existsById(Long productId) {
+        return springRepo.existsById(productId);
+    }
 }

@@ -1,0 +1,162 @@
+AbysaltoApp API
+Project Overview
+
+This is a Spring Boot 3 application following Clean Architecture principles.
+It provides APIs for managing users, products, favorites, and shopping carts.
+
+Requirements
+
+Java 17
+Maven 3.8+
+IntelliJ IDEA or another Java IDE
+Postman (for API testing)
+
+**Running the Application**
+
+Open the project in IntelliJ.
+
+Build the project:
+
+mvn clean install
+
+
+Run the Spring Boot app:
+
+mvn spring-boot:run
+
+
+The app runs by default at:
+
+http://localhost:8080
+
+API Endpoints
+1️⃣ User API (v1/api/auth)
+Method	URL	Request Body	Response	Description
+POST	/register	{ "username": "...", "password": "..." }	201 Created	Register a new user
+POST	/login	{ "username": "...", "password": "..." }	{ token: "..." }	Login and get JWT
+GET	/me	Bearer token	{ "id": ..., "username": "..." }	Get current user info
+2️⃣ Product API (v1/api/products)
+Method	URL	Request Body	Response	Description
+GET	/v1/api/products	—	List of products (paginated)	Get all products
+GET	/v1/api/products/{id}	—	ProductDto	Get single product
+3️⃣ Favorites API (v1/api/favorites)
+Method	URL	Request Body	Response	Description
+POST	/v1/api/favorites/{productId}	—	201 Created	Add product to favorites
+DELETE	/v1/api/favorites/{productId}	—	204 No Content	Remove product from favorites
+GET	/v1/api/favorites	—	{ favorites: [...] }	Get all favorites for user
+4️⃣ Cart API (v1/api/cart)
+Method	URL	Request Body	Response	Description
+GET	/v1/api/cart	—	CartDto	Get current user cart
+POST	/v1/api/cart/items	{ "productId": 1, "quantity": 2 }	CartDto	Add item to cart
+DELETE	/v1/api/cart/items/{productId}	—	CartDto	Remove item from cart
+5️⃣ Authentication
+
+All endpoints except /register and /login require Basic authentication. (send username and password)
+
+6️⃣ Testing in Postman
+
+Register a user
+
+Method: POST
+
+URL: http://localhost:8080/v1/api/auth/register
+
+Body (JSON):
+{
+  "username": "dejan",
+  "password": "12345"
+}
+
+Response 201 Created
+
+Method: POST
+
+URL: http://localhost:8080/v1/api/auth/login
+
+Body (JSON):
+
+{
+  "username": "dejan",
+  "password": "12345"
+}
+
+Response example:
+{
+    "username": "dejan",
+    "message": "Login successful"
+}
+
+
+
+
+Go to Authorization tab → Type: Basic Auth
+
+Use the username and password from login
+
+/me → GET
+
+Response :
+{
+    "id": 1,
+    "username": "dejan"
+}
+
+/v1/api/products
+
+Need to call this API without authentication (username and password)
+
+Response : { return a list of products from the URL https://dummyjson.com/products  }
+
+/v1/api/products/1
+
+Get product by ID
+In this case the username and password need to be sent in authorization tab
+
+Response:
+{
+    "id": 1,
+    "title": "Essence Mascara Lash Princess",
+    "price": 9.99
+}
+
+POST /v1/api/favorites/11
+Adds product with ID = 11 to the favorite list of the user that will be sent
+in the authorization tab
+
+GET /v1/api/favorites
+Return a list of the products that are added with the previous POST
+
+Add items to cart example:
+POST http://localhost:8080/v1/api/cart/items
+
+Body:
+
+{
+  "productId": 1,
+  "quantity": 2
+}
+
+Response:
+{
+    "cartId": null,
+    "items": []
+}
+
+GET http://localhost:8080/v1/api/cart - Retrieve users current cart
+username and password included return the users cart
+
+Response :
+{
+    "cartId": null,
+    "items": []
+}
+
+Remove item from cart example:
+
+DELETE http://localhost:8080/v1/api/cart/items/1
+
+7️⃣ Notes
+
+Pagination for products: default size=10, sort=title ASC.
+
+Adding the same product to cart increases quantity automatically.
