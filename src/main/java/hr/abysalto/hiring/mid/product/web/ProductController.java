@@ -2,6 +2,7 @@ package hr.abysalto.hiring.mid.product.web;
 
 import hr.abysalto.hiring.mid.product.app.usecase.ProductService;
 import hr.abysalto.hiring.mid.product.dto.ProductDto;
+import hr.abysalto.hiring.mid.product.mapper.ProductMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -23,11 +24,11 @@ public class ProductController {
 
     @GetMapping
     public Page<ProductDto> getProducts(@PageableDefault(size = 20, sort = "title", direction = Sort.Direction.ASC) Pageable pageable) {
-        return productService.getProducts(pageable);
+        return productService.getProducts(pageable).map(ProductMapper::toDto);
     }
 
     @GetMapping("/{id}")
     public ProductDto getProduct(@PathVariable Long id) {
-        return productService.getProduct(id);
+        return ProductMapper.toDto(productService.getProductById(id));
     }
 }

@@ -1,6 +1,6 @@
 package hr.abysalto.hiring.mid.user.app.port.in;
 
-import hr.abysalto.hiring.mid.cart.app.usecase.port.out.UserGateway;
+import hr.abysalto.hiring.mid.cart.app.port.out.UserGateway;
 import hr.abysalto.hiring.mid.user.domain.User;
 import hr.abysalto.hiring.mid.user.domain.UserRepository;
 import org.springframework.stereotype.Component;

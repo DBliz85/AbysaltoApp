@@ -1,6 +1,6 @@
 package hr.abysalto.hiring.mid.product.app.port.in;
 
-import hr.abysalto.hiring.mid.cart.app.usecase.port.out.ProductGateway;
+import hr.abysalto.hiring.mid.cart.app.port.out.ProductGateway;
 import hr.abysalto.hiring.mid.product.domain.ProductRepository;
 import hr.abysalto.hiring.mid.shared.readmodel.ProductView;
 import org.springframework.stereotype.Component;

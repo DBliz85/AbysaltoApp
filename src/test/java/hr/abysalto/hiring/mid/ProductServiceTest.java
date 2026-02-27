@@ -1,103 +1,100 @@
 package hr.abysalto.hiring.mid;
 
 import hr.abysalto.hiring.mid.product.app.usecase.ProductService;
+import hr.abysalto.hiring.mid.product.app.usecase.exception.ProductNotFoundException;
 import hr.abysalto.hiring.mid.product.domain.Product;
 import hr.abysalto.hiring.mid.product.domain.ProductRepository;
 import hr.abysalto.hiring.mid.product.dto.ProductDto;
-import hr.abysalto.hiring.mid.product.infrastructure.persistance.client.DummyJsonClient;
-import org.junit.jupiter.api.BeforeEach;
+import hr.abysalto.hiring.mid.product.infrastructure.persistence.client.DummyJsonClient;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class ProductServiceTest {
+@ExtendWith(MockitoExtension.class)
+class ProductServiceTest {
 
+    @Mock
     private ProductRepository productRepository;
+    @Mock
     private DummyJsonClient dummyJsonClient;
+    @InjectMocks
     private ProductService productService;
 
-    @BeforeEach
-    void setUp() {
-        productRepository = mock(ProductRepository.class);
-        dummyJsonClient = mock(DummyJsonClient.class);
-        productService = new ProductService(productRepository, dummyJsonClient);
-    }
-
     @Test
-    void testGetProducts_FromRepository() {
+    void should_get_products_from_repository() {
         Product p1 = new Product(1L, "Phone", BigDecimal.valueOf(500));
         Product p2 = new Product(2L, "Laptop", BigDecimal.valueOf(1000));
         Page<Product> page = new PageImpl<>(List.of(p1, p2));
         when(productRepository.findAll(PageRequest.of(0, 10))).thenReturn(page);
 
-        Page<ProductDto> result = productService.getProducts(PageRequest.of(0, 10));
+        Page<Product> result = productService.getProducts(PageRequest.of(0, 10));
 
         assertEquals(2, result.getContent().size());
-        assertEquals("Phone", result.getContent().get(0).title());
+        assertEquals("Phone", result.getContent().get(0).getTitle());
         verify(productRepository, times(1)).findAll(PageRequest.of(0, 10));
     }
 
     @Test
-    void testGetProducts_FromDummyJsonClient() {
-        when(productRepository.findAll(PageRequest.of(0, 10)))
-                .thenReturn(Page.empty());
+    void should_get_products_from_dummy_json_client() {
+        List<Product> savedProducts = List.of(
+                new Product(1L, "Tablet", BigDecimal.valueOf(300)),
+                new Product(2L, "Monitor", BigDecimal.valueOf(200))
+        );
 
-        ProductDto dto1 = new ProductDto(null, "Tablet", BigDecimal.valueOf(300));
-        ProductDto dto2 = new ProductDto(null, "Monitor", BigDecimal.valueOf(200));
-        when(dummyJsonClient.fetchProducts()).thenReturn(List.of(dto1, dto2));
+        when(productRepository.findAll(PageRequest.of(0, 10)))
+                .thenReturn(Page.empty())
+                .thenReturn(new PageImpl<>(savedProducts));
+
+        when(dummyJsonClient.fetchProducts())
+                .thenReturn(List.of(
+                        new ProductDto(null, "Tablet", BigDecimal.valueOf(300)),
+                        new ProductDto(null, "Monitor", BigDecimal.valueOf(200))
+                ));
+
+        when(productRepository.saveAll(anyList()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        Page<Product> result = productService.getProducts(PageRequest.of(0, 10));
+
+        assertEquals(2, result.getContent().size());
+        assertEquals("Tablet", result.getContent().get(0).getTitle());
+        assertEquals("Monitor", result.getContent().get(1).getTitle());
 
         ArgumentCaptor<List<Product>> captor = ArgumentCaptor.forClass(List.class);
-        when(productRepository.saveAll(captor.capture())).thenReturn(null);
-        when(productRepository.findAll(PageRequest.of(0, 10)))
-                .thenReturn(new PageImpl<>(List.of(
-                        new Product(1L, "Tablet", BigDecimal.valueOf(300)),
-                        new Product(2L, "Monitor", BigDecimal.valueOf(200))
-                )));
+        verify(productRepository, times(1)).saveAll(captor.capture());
 
-        Page<ProductDto> result = productService.getProducts(PageRequest.of(0, 10));
-
-        assertEquals(2, result.getContent().size());
-        assertEquals("Tablet", result.getContent().get(0).title());
-        verify(productRepository, times(1)).findAll(PageRequest.of(0, 10));
+        List<Product> captured = captor.getValue();
+        assertEquals(2, captured.size());
     }
 
     @Test
-    void testGetProduct_Found() {
+    void should_return_product_when_found_by_id() {
         Product product = new Product(1L, "Laptop", BigDecimal.valueOf(999.99));
         when(dummyJsonClient.fetchProductById(1L)).thenReturn(Optional.of(product));
 
-        ProductDto result = productService.getProduct(1L);
+        Product result = productService.getProductById(1L);
 
         assertNotNull(result);
-        assertEquals("Laptop", result.title());
+        assertEquals("Laptop", result.getTitle());
     }
 
     @Test
-    void testGetProduct_NotFound() {
+    void should_throw_exception_when_product_not_found() {
         when(dummyJsonClient.fetchProductById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> productService.getProduct(1L));
-    }
-
-    @Test
-    void testCreateProduct() {
-        Product product = new Product(1L, "Keyboard", BigDecimal.valueOf(100));
-        when(productRepository.save(any(Product.class))).thenReturn(product);
-
-        ProductDto result = productService.createProduct("Keyboard", BigDecimal.valueOf(100));
-
-        assertEquals("Keyboard", result.title());
-        assertEquals(BigDecimal.valueOf(100), result.price());
-        verify(productRepository, times(1)).save(any(Product.class));
+        assertThrows(ProductNotFoundException.class, () -> productService.getProductById(1L));
     }
 }

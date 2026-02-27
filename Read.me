@@ -49,47 +49,41 @@ Method	URL	Request Body	Response	Description
 GET	/v1/api/cart	—	CartDto	Get current user cart
 POST	/v1/api/cart/items	{ "productId": 1, "quantity": 2 }	CartDto	Add item to cart
 DELETE	/v1/api/cart/items/{productId}	—	CartDto	Remove item from cart
-5️⃣ Authentication
-
-All endpoints except /register and /login require Basic authentication. (send username and password)
 
 6️⃣ Testing in Postman
 
 Register a user
-
 Method: POST
 
 URL: http://localhost:8080/v1/api/auth/register
 
 Body (JSON):
 {
-  "username": "dejan",
+  "username": "test",
   "password": "12345"
 }
 
 Response 201 Created
 
 Method: POST
-
 URL: http://localhost:8080/v1/api/auth/login
-
 Body (JSON):
 
 {
-  "username": "dejan",
+  "username": "test",
   "password": "12345"
 }
 
 Response example:
 {
-    "username": "dejan",
-    "message": "Login successful"
+    "username": "test",
+    "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0IiwiaWF0IjoxNzcyMDM1MjEzLCJleHAiOjE3NzIwMzg4MTN9.-tk24CGFnxwJO_flbKQOFYg56J5l9q4d5A6P9jpgINY"
 }
 
 
-Go to Authorization tab → Type: Basic Auth
+Go to Authorization tab → Type: Bearer Token
 
-Use the username and password from login
+Use the token from login and set it as Token value for all feature requests
 
 /me → GET
 
@@ -101,14 +95,11 @@ Response :
 
 GET /v1/api/products
 
-Need to call this API without authentication (username and password)
-
 Response : { return a list of products from the URL https://dummyjson.com/products  }
 
 /v1/api/products/11
 
 Get product by ID
-In this case the username and password need to be sent in authorization tab
 
 Response:
 {
@@ -119,7 +110,6 @@ Response:
 
 POST /v1/api/favorites/11
 Adds product with ID = 11 to the favorite list of the user
-username and password need to be sent in the authorization tab
 
 Response 201 CREATED
 
@@ -164,7 +154,6 @@ Response:
 }
 
 GET http://localhost:8080/v1/api/cart - Retrieve users current cart
-username and password included return the users cart
 
 Response :
 {
